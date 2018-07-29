@@ -1,3 +1,5 @@
+html {}
+
 
 body {
     background-image: url(../images/hbg-small.jpg);
@@ -45,11 +47,11 @@ body {
     height:auto;
     display:inline-flex;
     overflow: hidden;
-    border-radius:25%;
+    border-radius:33%;
     font-family: 'Roboto Mono', monospace;
+    margin-bottom:30px;
   }
 
-/* Style the links inside the navigation bar */
 .topnav a {
     color: #f2f2f2;
     text-align: center;
@@ -59,14 +61,33 @@ body {
 
 }
 
-/* Change the color of links on hover */
 .topnav a:hover {
     background-color: #ddd;
     color: black;
 }
 
-/* Add a color to the active/current link */
 .topnav a.active {
     background-color: #4CAF50;
     color: white;
+}
+
+.welcome-content {
+    color:white;
+    background-color:rgba(192,192,192,0.5);
+    width: 80%;
+    display: inline-block;
+    padding: 0 50px;
+    text-align:justify;
+    font-family: 'Roboto Mono', monospace;
+    margin-bottom:100px
+}
+
+.footer {
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color:rgba(192,192,192,0.5);
+    color: white;
+    text-align: center;
+    font-family: 'Roboto Mono', monospace;
 }
