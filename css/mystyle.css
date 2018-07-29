@@ -1,0 +1,33 @@
+body {
+    background-image: url("../images/hbg.jpg");
+    background-repeat: no-repeat;
+    background-position: left top;
+    background-size:cover;
+    max-height:600px;
+    min-height:500px;
+}
+
+.profile-box {
+  border-radius: 25%;
+  width: 400px;
+  height: 400px;
+  background-color:rgba(192,192,192,0.5);
+  padding: 40px;
+  color:white;
+  margin: 0 auto;
+  margin-top: 50px;
+  text-align: center;
+}
+
+.prof-pic {
+  border-radius: 50%;
+  height: 200px;
+  width: 200px;
+}
+
+.prof-name {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 200;
+  letter-spacing: 5;
+  font-size: 40px;
+}
