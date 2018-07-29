@@ -49,6 +49,7 @@ body {
     overflow: hidden;
     border-radius:33%;
     font-family: 'Roboto Mono', monospace;
+    margin-top:30px;
     margin-bottom:60px;
   }
 
