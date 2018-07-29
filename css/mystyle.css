@@ -10,13 +10,14 @@ body {
 .profile-box {
   border-radius: 25%;
   width: 400px;
-  height: 400px;
+  height: 470px;
   background-color:rgba(192,192,192,0.5);
   padding: 40px;
   color:white;
   margin: 0 auto;
   margin-top: 50px;
   text-align: center;
+  font-family: 'Roboto Mono', monospace;
 }
 
 .prof-pic {
@@ -26,7 +27,6 @@ body {
 }
 
 .prof-name {
-  font-family: 'Roboto Mono', monospace;
   font-weight: 200;
   letter-spacing: 5;
   font-size: 40px;
