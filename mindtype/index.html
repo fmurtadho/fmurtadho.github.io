@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindType Typeracer</title>
+    <!-- Pixel Font -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Core Gruvbox Palette */
+            --bg-hard: #1d2021;
+            --bg-soft: #282828;
+            --fg: #ebdbb2;
+            --fg-dim: #928374; 
+            --red: #cc241d;
+            --green: #98971a;
+            --yellow: #d79921;
+            --blue: #458588;
+            --purple: #b16286;
+            --aqua: #689d6a;
+            --orange: #d65d0e;
+            
+            /* Dynamic Accent */
+            --accent: #d79921; 
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none; 
+        }
+
+        body {
+            background-color: var(--bg-hard);
+            color: var(--fg);
+            font-family: 'VT323', monospace; /* Pixel Font */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-size: 20px; /* Base size up for legibility */
+        }
+
+        /* --- CRT Scanline Effect --- */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* --- Layout & Utility --- */
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            padding: 1rem;
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Header --- */
+        .logo {
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 0px var(--bg-soft);
+        }
+        
+        .logo span { color: var(--accent); }
+
+        .subtitle {
+            color: var(--fg-dim);
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        /* --- Selection Grid --- */
+        .selection-screen {
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            scrollbar-width: none; /* Hide scrollbar for cleaner look */
+        }
+
+        .masters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            padding-bottom: 4rem;
+        }
+
+        .master-card {
+            background: var(--bg-soft);
+            border: 4px solid var(--fg-dim); /* Chunky border */
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+            text-align: left;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .master-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent); /* Highlight border */
+        }
+
+        .master-card:active {
+            transform: translateY(0px);
+        }
+
+        .master-info { flex: 1; }
+
+        .master-role {
+            font-size: 1rem;
+            color: var(--fg-dim);
+            text-transform: uppercase;
+            margin-bottom: 0.2rem;
+        }
+
+        .master-name {
+            font-size: 1.8rem;
+            color: var(--fg);
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .master-quote-preview {
+            color: var(--fg-dim);
+            font-size: 1rem;
+            opacity: 0.8;
+            font-style: italic;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Dynamic Hover Colors handled by JS inline styles on cards */
+        .card-accent-hover:hover { border-color: var(--hover-color); }
+        .card-accent-hover:hover .master-role { color: var(--hover-color); }
+
+        /* --- Typing Screen --- */
+        .typing-screen {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            gap: 1rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            color: var(--accent);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            border-bottom: 4px solid var(--bg-soft);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* --- Battle Canvas --- */
+        .battle-arena-canvas {
+            width: 100%;
+            height: 160px; /* Taller for nice big pixels */
+            background: #151718; /* Darker than hard bg for contrast */
+            border: 4px solid var(--fg-dim);
+            image-rendering: pixelated; /* Crucial for crispy pixels */
+            display: block;
+        }
+
+        /* --- Text Area --- */
+        .typing-area-wrapper {
+            position: relative;
+            min-height: 120px;
+            font-size: 2rem; /* Big pixel text */
+            line-height: 1.4;
+            cursor: text;
+            margin-top: 1rem;
+        }
+
+        #words {
+            color: var(--fg-dim);
+            position: relative;
+            z-index: 2;
+        }
+
+        .word {
+            display: inline-block;
+            margin-right: 0.75rem; /* Space between words */
+        }
+
+        .letter {
+            border-bottom: 2px solid transparent; /* Guide line */
+        }
+        .letter.correct { color: var(--fg); }
+        .letter.incorrect { 
+            color: var(--red); 
+            border-bottom: 2px solid var(--red);
+            background: rgba(204, 36, 29, 0.1);
+        }
+
+        /* Block Caret */
+        #caret {
+            width: 14px;
+            height: 2.2rem;
+            background-color: var(--accent);
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 1;
+            transition: left 0.05s ease-out, top 0.05s ease-out; 
+            opacity: 0.7;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+        .typing #caret { animation: none; opacity: 0.9; }
+
+        /* --- Footer --- */
+        .footer-nav {
+            margin-top: 2rem;
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--fg-dim);
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: var(--fg-dim);
+            font-family: inherit;
+            font-size: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .btn-text:hover { color: var(--accent); text-decoration: underline; }
+
+        .key-hint {
+            border: 1px solid var(--fg-dim);
+            padding: 0 6px;
+            border-radius: 2px;
+            color: var(--fg);
+            font-size: 0.9em;
+        }
+
+        /* --- Overlays (Quote Select & Results) --- */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(29, 32, 33, 0.95);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .overlay-box {
+            width: 100%;
+            max-width: 800px;
+            border: 4px solid var(--fg);
+            background: var(--bg-hard);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-height: 80vh;
+        }
+
+        /* Scrollable list */
+        .scroll-list {
+            width: 100%;
+            overflow-y: auto;
+            padding-right: 1rem;
+            scrollbar-color: var(--accent) var(--bg-soft);
+            scrollbar-width: thin;
+        }
+
+        .list-item {
+            padding: 1rem;
+            border-bottom: 2px dashed var(--bg-soft);
+            cursor: pointer;
+            color: var(--fg-dim);
+            text-align: left;
+        }
+        .list-item:hover { color: var(--accent); background: var(--bg-soft); }
+
+        .btn-pixel {
+            margin-top: 2rem;
+            background: var(--bg-soft);
+            color: var(--accent);
+            border: 4px solid var(--accent);
+            padding: 1rem 3rem;
+            font-family: inherit;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .btn-pixel:hover {
+            background: var(--accent);
+            color: var(--bg-hard);
+            transform: translateY(-2px);
+        }
+        .btn-pixel:active { transform: translateY(2px); }
+
+        /* Updated Results Stats Styles */
+        .stat-big { 
+            font-size: 8rem; 
+            line-height: 1; 
+            color: var(--accent); 
+            margin-bottom: 0; 
+        }
+        .stat-label { 
+            font-size: 1.5rem; 
+            color: var(--fg-dim); 
+            text-transform: uppercase; 
+            margin-bottom: 2rem; 
+        }
+        
+        .secondary-stats {
+            display: flex;
+            flex-direction: row;
+            gap: 3rem;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            color: var(--fg);
+        }
+        
+        .sec-stat-group { 
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            gap: 0.75rem;
+        }
+        
+        .sec-stat-lbl { 
+            color: var(--fg-dim); 
+            text-transform: uppercase;
+            font-size: 1.4rem;
+        }
+        
+        .sec-stat-val {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .insight-box {
+            margin: 1rem 0 2rem;
+            border-top: 2px dashed var(--fg-dim);
+            border-bottom: 2px dashed var(--fg-dim);
+            padding: 2rem;
+            text-align: center;
+            max-width: 800px;
+        }
+        .insight-text { 
+            font-size: 1.6rem; 
+            color: var(--fg); 
+            font-style: italic; 
+            line-height: 1.4;
+        }
+
+        #hidden-input { opacity: 0; position: absolute; z-index: -1; }
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+    <input type="text" id="hidden-input" autocomplete="off" autocapitalize="off" spellcheck="false">
+
+    <!-- Screen 1: Master Selection -->
+    <div id="selection-screen" class="container selection-screen fade-in">
+        <div class="logo">Mind<span>Type</span></div>
+        <div class="subtitle">Select Character</div>
+
+        <div class="masters-grid" id="masters-grid-container"></div>
+    </div>
+
+    <!-- Screen 2: Game Interface -->
+    <div id="typing-screen" class="container typing-screen hidden">
+        <div class="stats-bar" id="stats-bar">
+            <div><span id="live-wpm">0</span> WPM</div>
+            <div id="master-indicator">THE GENERAL</div>
+            <div><span id="live-acc">100</span>% ACC</div>
+        </div>
+
+        <canvas id="battle-canvas" class="battle-arena-canvas"></canvas>
+
+        <div class="typing-area-wrapper" id="game-wrapper">
+            <div id="caret"></div>
+            <div id="words"></div>
+        </div>
+
+        <div class="footer-nav">
+            <div><span class="key-hint">TAB</span> RESTART</div>
+            <div><span class="key-hint">ESC</span> MENU</div>
+            <button class="btn-text" onclick="showQuoteSelection()">[ SELECT MISSION ]</button>
+        </div>
+    </div>
+
+    <!-- Screen 3: Quote Selection -->
+    <div id="quote-selection" class="overlay hidden">
+        <div class="overlay-box">
+            <h2 class="subtitle" style="margin-top:0;">Available Wisdom</h2>
+            <div id="quote-list" class="scroll-list"></div>
+            <button class="btn-pixel" onclick="closeQuoteSelection()">BACK</button>
+        </div>
+    </div>
+
+    <!-- Screen 4: Results -->
+    <div id="results-screen" class="overlay hidden">
+        <div class="stat-big" id="res-wpm">0</div>
+        <div class="stat-label">Words Per Minute</div>
+
+        <div class="secondary-stats">
+            <div class="sec-stat-group">
+                <div class="sec-stat-lbl">Accuracy:</div>
+                <div class="sec-stat-val" id="res-acc">0%</div>
+            </div>
+            <div class="sec-stat-group">
+                <div class="sec-stat-lbl">Time:</div>
+                <div class="sec-stat-val" id="res-time">0s</div>
+            </div>
+        </div>
+
+        <div class="insight-box">
+            <div class="insight-text" id="res-insight"></div>
+        </div>
+
+        <button class="btn-pixel" onclick="restartGame()">Next Battle</button>
+        <div class="result-nav-hint" style="margin-top:1rem;">Press <span class="key-hint">ENTER</span></div>
+        <button class="btn-text" style="margin-top:1rem;" onclick="toMenu()">Character Select</button>
+    </div>
+
+    <script>
+        // --- Data: Masters & Quotes (Expanded to 15+) ---
+        const masters = {
+            tzu: {
+                key: 'tzu',
+                name: "Sun Tzu",
+                role: "The General",
+                color: "#d79921",
+                quotes: [
+                    { text: "The supreme art of war is to subdue the enemy without fighting.", insight: "Strategy beats force." },
+                    { text: "In the midst of chaos, there is also opportunity.", insight: "Look for openings when others panic." },
+                    { text: "Appear weak when you are strong, and strong when you are weak.", insight: "Deception is key to warfare." },
+                    { text: "Victorious warriors win first and then go to war, while defeated warriors go to war first and then seek to win.", insight: "Preparation determines the outcome." },
+                    { text: "Even the finest sword plunged into salt water will eventually rust.", insight: "Maintain your skills and tools." },
+                    { text: "Treat your men as you would your own beloved sons. And they will follow you into the deepest valley.", insight: "Loyalty is earned through care." },
+                    { text: "Move swift as the Wind and closely-formed as the Wood. Attack like the Fire and be still as the Mountain.", insight: "Adapt your nature to the situation." },
+                    { text: "Opportunities multiply as they are seized.", insight: "Action creates momentum." },
+                    { text: "The greatest victory is that which requires no battle.", insight: "Peace is the ultimate strategic goal." },
+                    { text: "If you wait by the river long enough, the bodies of your enemies will float by.", insight: "Patience allows time to defeat your foes." },
+                    { text: "He who wishes to fight must first count the cost.", insight: "Understand the price of conflict." },
+                    { text: "To know your Enemy, you must become your Enemy.", insight: "Empathy leads to prediction." },
+                    { text: "Strategy without tactics is the slowest route to victory. Tactics without strategy is the noise before defeat.", insight: "Vision needs action; action needs vision." },
+                    { text: "Build your opponent a golden bridge to retreat across.", insight: "Desperate enemies fight harder; leave them an exit." },
+                    { text: "Sweat more during peace: bleed less during war.", insight: "Hard training prevents hard losses." }
+                ]
+            },
+            laotzu: {
+                key: 'laotzu',
+                name: "Lao Tzu",
+                role: "The Sage",
+                color: "#98971a",
+                quotes: [
+                    { text: "Nature does not hurry, yet everything is accomplished.", insight: "Patience aligns with the Tao." },
+                    { text: "The journey of a thousand miles begins with a single step.", insight: "Focus on the start, not the distance." },
+                    { text: "Knowing others is intelligence; knowing yourself is true wisdom.", insight: "Self-awareness is the ultimate power." },
+                    { text: "He who knows that enough is enough will always have enough.", insight: "Contentment is true wealth." },
+                    { text: "Act without expectation.", insight: "Detach from the outcome to find peace." },
+                    { text: "Silence is a source of great strength.", insight: "In stillness, power accumulates." },
+                    { text: "If you are depressed you are living in the past. If you are anxious you are living in the future.", insight: "Presence is the cure for suffering." },
+                    { text: "Be content with what you have; rejoice in the way things are.", insight: "Acceptance opens the world to you." },
+                    { text: "The truth is not always beautiful, nor beautiful words the truth.", insight: "Reality is often plain or harsh." },
+                    { text: "A leader is best when people barely know he exists.", insight: "True leadership empowers others, not the self." },
+                    { text: "When I let go of what I am, I become what I might be.", insight: "Release your identity to find your potential." },
+                    { text: "Great acts are made up of small deeds.", insight: "Consistency builds greatness." },
+                    { text: "Anticipate the difficult by managing the easy.", insight: "Solve problems before they become crises." },
+                    { text: "He who conquers others is strong; he who conquers himself is mighty.", insight: "Internal victory is the hardest battle." },
+                    { text: "Kindness in words creates confidence. Kindness in giving creates love.", insight: "Benevolence is a creative force." }
+                ]
+            },
+            musashi: {
+                key: 'musashi',
+                name: "Musashi",
+                role: "The Ronin",
+                color: "#458588",
+                quotes: [
+                    { text: "Think lightly of yourself and deeply of the world.", insight: "Remove ego to see clearly." },
+                    { text: "Do not regret what you have done.", insight: "Accept the past to move forward." },
+                    { text: "There is more than one path to the top of the mountain.", insight: "Be adaptable in your methods." },
+                    { text: "Get beyond love and grief: exist for the good of Man.", insight: "Detachment brings clarity." },
+                    { text: "You can only fight the way you practice.", insight: " habits define performance." },
+                    { text: "Today is victory over yourself of yesterday; tomorrow is your victory over lesser men.", insight: "Constant self-improvement is the goal." },
+                    { text: "Truth is not what you want it to be; it is what it is.", insight: "Accept reality without delusion." },
+                    { text: "Generally speaking, the Way of the warrior is resolute acceptance of death.", insight: "Fearlessness comes from acceptance." },
+                    { text: "In battles, if you make your opponent flinch, you have already won.", insight: "Psychological dominance precedes physical victory." },
+                    { text: "If you wish to control others you must first control yourself.", insight: "Mastery begins within." },
+                    { text: "It is difficult to understand the universe if you only study one planet.", insight: "Broaden your perspective." },
+                    { text: "Do not hold on to possessions you no longer need.", insight: "Travel light in life." },
+                    { text: "Perceive that which cannot be seen with the eye.", insight: "Intuition is a warrior's tool." },
+                    { text: "Do nothing which is of no use.", insight: "Efficiency is a lifestyle." },
+                    { text: "Step by step walk the thousand-mile road.", insight: "Persistence conquers distance." }
+                ]
+            },
+            nietzsche: {
+                key: 'nietzsche',
+                name: "Nietzsche",
+                role: "The Prophet",
+                color: "#b16286",
+                quotes: [
+                    { text: "He who has a why to live for can bear almost any how.", insight: "Purpose fuels endurance." },
+                    { text: "That which does not kill us makes us stronger.", insight: "Adversity builds character." },
+                    { text: "And if you gaze long enough into an abyss, the abyss will gaze back into you.", insight: "Be careful what you fight." },
+                    { text: "The individual has always had to struggle to keep from being overwhelmed by the tribe.", insight: "Authenticity requires courage." },
+                    { text: "He who fights with monsters should look to it that he himself does not become a monster.", insight: "Guard your soul in conflict." },
+                    { text: "The snake which cannot cast its skin has to die.", insight: "Change is necessary for survival." },
+                    { text: "Sometimes people don't want to hear the truth because they don't want their illusions destroyed.", insight: "Comfort is often preferred over reality." },
+                    { text: "It is not a lack of love, but a lack of friendship that makes unhappy marriages.", insight: "Companionship sustains relationships." },
+                    { text: "You shall become the person you are.", insight: "Self-actualization is a duty." },
+                    { text: "There is always some madness in love. But there is also always some reason in madness.", insight: "Emotion has its own logic." },
+                    { text: "No price is too high to pay for the privilege of owning yourself.", insight: "Freedom is the highest value." },
+                    { text: "Without music, life would be a mistake.", insight: "Art is essential for existence." },
+                    { text: "One must still have chaos in oneself to be able to give birth to a dancing star.", insight: "Creativity requires inner turmoil." },
+                    { text: "To live is to suffer, to survive is to find some meaning in the suffering.", insight: "Meaning transforms pain." },
+                    { text: "All things are subject to interpretation whichever interpretation prevails is a function of power.", insight: "Truth is often defined by the victor." }
+                ]
+            },
+            machiavelli: {
+                key: 'machiavelli',
+                name: "Machiavelli",
+                role: "The Prince",
+                color: "#cc241d",
+                quotes: [
+                    { text: "It is better to be feared than loved, if you cannot be both.", insight: "Control is more reliable than affection." },
+                    { text: "Never attempt to win by force what can be won by deception.", insight: "Efficiency over brute strength." },
+                    { text: "The first method for estimating the intelligence of a ruler is to look at the men he has around him.", insight: "Your company defines your capability." },
+                    { text: "Where the willingness is great, the difficulties cannot be great.", insight: "Willpower overcomes obstacles." },
+                    { text: "Entrepreneurs are simply those who understand that there is little difference between obstacle and opportunity.", insight: "Perspective shifts reality." },
+                    { text: "Everyone sees what you appear to be, few experience what you really are.", insight: "Image is power." },
+                    { text: "The lion cannot protect himself from traps, and the fox cannot defend himself from wolves.", insight: "Combine strength with cunning." },
+                    { text: "There is no other way to guard yourself against flattery than by making men understand that telling you the truth will not offend you.", insight: "Encourage honesty to avoid delusion." },
+                    { text: "A prudent man should always follow in the footsteps of great men.", insight: "Learn from those who succeeded before." },
+                    { text: "He who wishes to be obeyed must know how to command.", insight: "Authority requires competence." },
+                    { text: "Men are so simple and so much inclined to obey immediate needs that a deceiver will never lack victims.", insight: "People are easily manipulated by desire." },
+                    { text: "Politics have no relation to morals.", insight: "Pragmatism ignores ethics." },
+                    { text: "The promise given was a necessity of the past: the word broken is a necessity of the present.", insight: "Adaptability supersedes consistency." },
+                    { text: "It is double pleasure to deceive the deceiver.", insight: "Outsmarting a fox is satisfying." },
+                    { text: "Hatred is gained as much by good works as by evil.", insight: "Action always invites reaction." }
+                ]
+            }
+        };
+
+        // --- DOM Elements ---
+        const els = {
+            selectionScreen: document.getElementById('selection-screen'),
+            typingScreen: document.getElementById('typing-screen'),
+            resultsScreen: document.getElementById('results-screen'),
+            quoteSelection: document.getElementById('quote-selection'),
+            quoteList: document.getElementById('quote-list'),
+            wordsContainer: document.getElementById('words'),
+            caret: document.getElementById('caret'),
+            hiddenInput: document.getElementById('hidden-input'),
+            root: document.documentElement,
+            masterIndicator: document.getElementById('master-indicator'),
+            liveWpm: document.getElementById('live-wpm'),
+            liveAcc: document.getElementById('live-acc'),
+            statsBar: document.getElementById('stats-bar'), 
+            canvas: document.getElementById('battle-canvas'),
+            resWpm: document.getElementById('res-wpm'),
+            resAcc: document.getElementById('res-acc'),
+            resTime: document.getElementById('res-time'),
+            resInsight: document.getElementById('res-insight')
+        };
+
+        // --- State ---
+        let state = {
+            master: null,
+            text: "",
+            words: [],
+            insight: "",
+            charIndex: 0,
+            startTime: null,
+            timer: null,
+            history: [],
+            isRunning: false,
+            lastQuoteIndex: -1 // Track to prevent repeats
+        };
+
+        // --- Battle System (Canvas Engine) ---
+        class BattleEngine {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.width = 0;
+                this.height = 0;
+                this.colors = { accent: '#d79921', red: '#cc241d', bg: '#1d2021' };
+                
+                this.hero = { x: 0, y: 0, state: 'IDLE', frame: 0, attackTimer: 0 };
+                this.enemies = [];
+                this.particles = [];
+                this.floorOffset = 0;
+                this.currentPct = 0; // Physics target percentage
+                
+                this.loop = this.loop.bind(this);
+                requestAnimationFrame(this.loop);
+            }
+
+            resize() {
+                const rect = this.canvas.getBoundingClientRect();
+                if (rect.width === 0) return; 
+                this.canvas.width = rect.width;
+                this.canvas.height = rect.height;
+                this.width = rect.width;
+                this.height = rect.height;
+                this.updateColors();
+            }
+
+            updateColors() {
+                const s = getComputedStyle(document.documentElement);
+                this.colors.accent = s.getPropertyValue('--accent').trim();
+                this.colors.red = s.getPropertyValue('--red').trim();
+            }
+
+            reset(enemiesConfig) {
+                this.resize();
+                this.hero.x = 20;
+                this.hero.state = 'IDLE';
+                this.hero.attackTimer = 0;
+                this.floorOffset = 0;
+                this.particles = [];
+                this.currentPct = 0;
+                
+                this.enemies = enemiesConfig.map(cfg => ({
+                    xPct: cfg.pct, 
+                    type: cfg.type, 
+                    alive: true,
+                    animTimer: Math.random() * 10
+                }));
+            }
+
+            updateProgress(pct) {
+                this.currentPct = pct;
+            }
+
+            updatePhysics() {
+                // Decrement attack timer
+                if (this.hero.attackTimer > 0) {
+                    this.hero.attackTimer -= 1;
+                    this.hero.state = 'ATTACK';
+                }
+
+                // Determine target X based on current Progress %
+                const targetX = 20 + (this.currentPct * (this.width - 100));
+                
+                // Hero Movement Physics (Lerp)
+                const diff = targetX - this.hero.x;
+                if (Math.abs(diff) > 1) {
+                    this.hero.x += diff * 0.1; 
+                    // Only switch to RUN if not currently locked in ATTACK
+                    if (this.hero.attackTimer <= 0) {
+                        this.hero.state = 'RUN';
+                    }
+                    this.floorOffset += diff * 0.1;
+                } else {
+                    this.hero.x = targetX; // Snap
+                    // Only switch to IDLE if not locked in ATTACK
+                    if (this.hero.attackTimer <= 0) {
+                        this.hero.state = 'IDLE';
+                    }
+                }
+
+                // Enemies
+                this.enemies.forEach(e => {
+                    const eX = 20 + (e.xPct * (this.width - 100));
+                    
+                    if (e.alive) {
+                        // Logic: Kill Minions on proximity, but BOSS only on 100% completion
+                        if (e.type === 'BOSS') {
+                            // Relaxed Boss Kill Logic:
+                            // Check if text is done (1.0) AND Hero is close enough OR past the engagement line (eX - 60)
+                            if (this.currentPct >= 1.0 && this.hero.x >= eX - 60) {
+                                this.killEnemy(e, eX);
+                            }
+                        } else {
+                            // Minions die on touch
+                            if (this.hero.x >= eX - 40) {
+                                this.killEnemy(e, eX);
+                            }
+                        }
+                    }
+                });
+            }
+
+            killEnemy(e, x) {
+                e.alive = false;
+                this.hero.state = 'ATTACK';
+                this.hero.attackTimer = 20; // Lock attack for 20 frames (~0.3s)
+
+                const isBoss = e.type === 'BOSS';
+                const pCount = isBoss ? 100 : 20; // Massive splash for boss
+                const pSpeed = isBoss ? 15 : 8;
+
+                // Spawn particles
+                for(let i=0; i<pCount; i++) {
+                    this.particles.push({
+                        x: x + 20, y: this.height - 40,
+                        vx: (Math.random()-0.5)*pSpeed, 
+                        vy: (Math.random()-1.2)*pSpeed,
+                        life: 1.0 + Math.random(), // Longer life
+                        color: (Math.random() > 0.8 ? '#fff' : this.colors.red), // Add gleam
+                        size: (Math.random() * (isBoss ? 6 : 3)) + 2 // Bigger chunks
+                    });
+                }
+            }
+
+            loop() {
+                if (this.width === 0) { requestAnimationFrame(this.loop); return; }
+
+                this.updatePhysics(); // Separate physics step
+
+                this.ctx.fillStyle = "#151718"; 
+                this.ctx.fillRect(0,0,this.width, this.height);
+
+                // Floor
+                this.ctx.fillStyle = this.colors.bg;
+                const floorY = this.height - 20;
+                const tileSize = 20;
+                for(let i=0; i < (this.width/tileSize)+2; i++) {
+                    const drawX = (i * tileSize) - (this.floorOffset % tileSize);
+                    if (i%2===0) this.ctx.fillRect(drawX, floorY, tileSize, 20);
+                }
+
+                // Enemies
+                this.enemies.forEach(e => {
+                    const x = 20 + (e.xPct * (this.width - 100));
+                    const y = this.height - 50; 
+                    if (e.alive) {
+                        e.animTimer += 0.1;
+                        const bob = Math.sin(e.animTimer)*3;
+                        if (e.type === 'MINION') this.drawSprite(x, y + bob, this.colors.red, 'SKULL');
+                        else this.drawSprite(x, y - 20 + bob, this.colors.red, 'DEMON');
+                    }
+                });
+
+                // Hero
+                const y = this.height - 50;
+                this.hero.frame += 0.2;
+                
+                if (this.hero.state === 'ATTACK') {
+                    // Draw Hero Frame
+                    this.drawSprite(this.hero.x, y, this.colors.accent, 'KNIGHT_ATTACK');
+                    // Draw Slash Effect
+                    this.drawSlash(this.hero.x, y);
+                } else {
+                    const runBob = this.hero.state === 'RUN' ? Math.abs(Math.sin(this.hero.frame))*5 : 0;
+                    this.drawSprite(this.hero.x, y - runBob, this.colors.accent, 'KNIGHT');
+                }
+
+                // Particles
+                this.particles.forEach((p, i) => {
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.5; p.life -= 0.03;
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = Math.max(0, p.life);
+                    this.ctx.fillRect(p.x, p.y, p.size, p.size);
+                    this.ctx.globalAlpha = 1;
+                    if (p.life <= 0) this.particles.splice(i, 1);
+                });
+
+                requestAnimationFrame(this.loop);
+            }
+
+            // Draw Swipe/Slash Arc
+            drawSlash(x, y) {
+                this.ctx.fillStyle = '#fff';
+                this.ctx.globalAlpha = 0.8;
+                this.ctx.beginPath();
+                // Simple arc shape relative to hero
+                this.ctx.moveTo(x + 40, y - 10);
+                this.ctx.quadraticCurveTo(x + 90, y + 20, x + 40, y + 50);
+                this.ctx.quadraticCurveTo(x + 70, y + 20, x + 40, y - 10);
+                this.ctx.fill();
+                this.ctx.globalAlpha = 1;
+            }
+
+            drawSprite(x, y, color, type) {
+                const s = 4; // Scale
+                this.ctx.fillStyle = color;
+                const dark = '#1d2021';
+                
+                if (type === 'KNIGHT') {
+                    this.ctx.fillRect(x+1*s, y+2*s, 3*s, 3*s); 
+                    this.ctx.fillRect(x+1*s, y, 3*s, 2*s);
+                    this.ctx.fillStyle = '#cc241d';
+                    this.ctx.fillRect(x+2*s, y-1*s, 2*s, 1*s);
+                    this.ctx.fillStyle = '#ebdbb2';
+                    this.ctx.fillRect(x+4*s, y-1*s, 1*s, 4*s);
+                }
+                else if (type === 'KNIGHT_ATTACK') {
+                    this.ctx.fillRect(x+1*s, y+2*s, 3*s, 3*s); 
+                    this.ctx.fillRect(x+1*s, y, 3*s, 2*s); 
+                    this.ctx.fillStyle = '#ebdbb2';
+                    this.ctx.fillRect(x+4*s, y+2*s, 4*s, 1*s); // Sword forward
+                }
+                else if (type === 'SKULL') {
+                    this.ctx.fillStyle = color;
+                    this.ctx.fillRect(x, y, 4*s, 4*s); 
+                    this.ctx.fillStyle = dark;
+                    this.ctx.fillRect(x+1*s, y+1*s, 1*s, 1*s); 
+                    this.ctx.fillRect(x+3*s, y+1*s, 1*s, 1*s); 
+                }
+                else if (type === 'DEMON') {
+                    this.ctx.fillStyle = color;
+                    this.ctx.fillRect(x, y, 8*s, 8*s); 
+                    this.ctx.fillStyle = '#fabd2f'; 
+                    this.ctx.fillRect(x, y-2*s, 1*s, 3*s);
+                    this.ctx.fillRect(x+7*s, y-2*s, 1*s, 3*s);
+                    this.ctx.fillStyle = '#fff'; 
+                    this.ctx.fillRect(x+2*s, y+2*s, 1*s, 1*s);
+                    this.ctx.fillRect(x+5*s, y+2*s, 1*s, 1*s);
+                }
+            }
+        }
+
+        const battle = new BattleEngine(els.canvas);
+
+        // --- Logic: Init & Navigation ---
+        
+        const container = document.getElementById('masters-grid-container');
+        Object.values(masters).forEach(m => {
+            const card = document.createElement('div');
+            card.className = 'master-card card-accent-hover';
+            card.style.setProperty('--hover-color', m.color);
+            card.onclick = () => selectMaster(m.key);
+            
+            card.innerHTML = `
+                <div class="master-info">
+                    <div class="master-role">${m.role}</div>
+                    <div class="master-name">${m.name}</div>
+                    <div class="master-quote-preview">"${m.quotes[0].text}"</div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        function selectMaster(key) {
+            state.master = masters[key];
+            els.root.style.setProperty('--accent', state.master.color);
+            els.masterIndicator.innerText = state.master.role;
+            state.lastQuoteIndex = -1; // Reset quote history on master change
+            
+            els.selectionScreen.classList.add('hidden');
+            els.typingScreen.classList.remove('hidden');
+            els.typingScreen.classList.add('fade-in');
+            
+            battle.updateColors();
+            battle.resize();
+            
+            initGame();
+        }
+
+        function toMenu() {
+            els.resultsScreen.classList.add('hidden');
+            els.typingScreen.classList.add('hidden');
+            els.selectionScreen.classList.remove('hidden');
+            state.isRunning = false;
+        }
+
+        function initGame(quoteIndex = null) {
+            // Reset Logic
+            state.charIndex = 0;
+            state.startTime = null;
+            state.isRunning = false;
+            state.history = [];
+            els.hiddenInput.value = '';
+            els.statsBar.style.opacity = '0.5';
+            
+            // Pick Quote (No Repeat Logic)
+            const list = state.master.quotes;
+            let qIdx;
+            
+            if (quoteIndex !== null) {
+                qIdx = quoteIndex;
+            } else {
+                // If random, ensure it's not the same as last time (if possible)
+                if (list.length > 1) {
+                    do {
+                        qIdx = Math.floor(Math.random() * list.length);
+                    } while (qIdx === state.lastQuoteIndex);
+                } else {
+                    qIdx = 0;
+                }
+            }
+            
+            state.lastQuoteIndex = qIdx; // Remember this quote
+            const q = list[qIdx];
+            state.text = q.text;
+            state.insight = q.insight;
+            
+            // Build DOM
+            const words = state.text.split(' ');
+            els.wordsContainer.innerHTML = '';
+            state.words = [];
+            
+            words.forEach((w, wIdx) => {
+                const wDiv = document.createElement('div');
+                wDiv.className = 'word';
+                [...w].forEach(c => {
+                    const span = document.createElement('span');
+                    span.className = 'letter';
+                    span.innerText = c;
+                    wDiv.appendChild(span);
+                    state.words.push({ char: c, el: span });
+                });
+                if (wIdx < words.length - 1) {
+                    const sSpan = document.createElement('span');
+                    sSpan.className = 'letter';
+                    sSpan.innerHTML = '&nbsp;';
+                    wDiv.appendChild(sSpan);
+                    state.words.push({ char: ' ', el: sSpan });
+                }
+                els.wordsContainer.appendChild(wDiv);
+            });
+
+            // Reset Battle (Boss at 100%)
+            battle.reset([
+                { pct: 0.25, type: 'MINION' },
+                { pct: 0.50, type: 'MINION' },
+                { pct: 0.75, type: 'MINION' },
+                { pct: 1.0, type: 'BOSS' } 
+            ]);
+
+            els.hiddenInput.focus();
+            updateCaret();
+        }
+
+        // --- Logic: Typing Engine ---
+
+        document.addEventListener('keydown', e => {
+            if (!els.quoteSelection.classList.contains('hidden')) {
+                if(e.key === 'Escape') closeQuoteSelection();
+                return;
+            }
+            if (!els.resultsScreen.classList.contains('hidden')) {
+                if(e.key === 'Enter') restartGame();
+                if(e.key === 'Escape') toMenu();
+                return;
+            }
+            if (els.typingScreen.classList.contains('hidden')) return;
+
+            if (e.key === 'Tab') { e.preventDefault(); restartGame(); }
+            if (e.key === 'Escape') toMenu();
+            els.hiddenInput.focus();
+        });
+
+        els.hiddenInput.addEventListener('input', e => {
+            if (!state.words || state.charIndex >= state.words.length) return;
+            if (!els.quoteSelection.classList.contains('hidden')) return; 
+
+            const char = els.hiddenInput.value.slice(-1);
+            const type = e.inputType;
+            
+            if (!state.isRunning) {
+                state.isRunning = true;
+                state.startTime = Date.now();
+                startStatsLoop();
+                els.statsBar.style.opacity = '1';
+            }
+
+            if (type === 'deleteContentBackward') {
+                if (state.charIndex > 0) {
+                    state.charIndex--;
+                    const item = state.words[state.charIndex];
+                    item.el.className = 'letter';
+                    state.history.pop();
+                }
+            } 
+            else if (char) {
+                const target = state.words[state.charIndex];
+                if (char === target.char) {
+                    target.el.classList.add('correct');
+                    state.history.push(true);
+                } else {
+                    target.el.classList.add('incorrect');
+                    state.history.push(false);
+                }
+                state.charIndex++;
+            }
+
+            els.hiddenInput.value = ' ';
+            updateCaret();
+            
+            // Update Battle
+            const progress = state.charIndex / state.words.length;
+            battle.updateProgress(progress);
+
+            if (state.charIndex === state.words.length) endGame();
+        });
+
+        function updateCaret() {
+            if (state.charIndex < state.words.length) {
+                const rect = state.words[state.charIndex].el.getBoundingClientRect();
+                const wrap = document.getElementById('game-wrapper').getBoundingClientRect();
+                els.caret.style.top = (rect.top - wrap.top) + 'px';
+                els.caret.style.left = (rect.left - wrap.left) + 'px';
+            }
+        }
+
+        function startStatsLoop() {
+            if (state.timer) clearInterval(state.timer);
+            state.timer = setInterval(() => {
+                if (!state.isRunning) return;
+                const mins = (Date.now() - state.startTime) / 60000;
+                const wpm = Math.round((state.charIndex/5) / mins) || 0;
+                els.liveWpm.innerText = wpm;
+            }, 500);
+        }
+
+        function endGame() {
+            state.isRunning = false;
+            clearInterval(state.timer);
+            const time = (Date.now() - state.startTime) / 1000;
+            const wpm = Math.round((state.words.length/5) / (time/60));
+            const acc = Math.round((state.history.filter(Boolean).length / state.words.length) * 100);
+
+            battle.updateProgress(1.0);
+
+            setTimeout(() => {
+                els.resWpm.innerText = wpm;
+                els.resAcc.innerText = acc + '%';
+                els.resTime.innerText = time.toFixed(1) + 's';
+                els.resInsight.innerText = state.insight;
+                els.resultsScreen.classList.remove('hidden');
+            }, 1000);
+        }
+
+        function restartGame() {
+            els.resultsScreen.classList.add('hidden');
+            initGame();
+        }
+
+        // --- Menu Logic ---
+        function showQuoteSelection() {
+            const list = els.quoteList;
+            list.innerHTML = '';
+            state.master.quotes.forEach((q, i) => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerText = `"${q.text}"`;
+                item.onclick = () => {
+                    closeQuoteSelection();
+                    initGame(i);
+                };
+                list.appendChild(item);
+            });
+            els.quoteSelection.classList.remove('hidden');
+        }
+
+        function closeQuoteSelection() {
+            els.quoteSelection.classList.add('hidden');
+            els.hiddenInput.focus();
+        }
+
+        window.addEventListener('resize', () => {
+            if (!els.typingScreen.classList.contains('hidden')) {
+                battle.resize();
+                updateCaret();
+            }
+        });
+
+    </script>
+</body>
+</html>
