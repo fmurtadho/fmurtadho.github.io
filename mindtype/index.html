@@ -321,7 +321,7 @@
         .list-item:hover { color: var(--accent); background: var(--bg-soft); }
 
         .btn-pixel {
-            margin-top: 2rem;
+            margin-top: 1rem;
             background: var(--bg-soft);
             color: var(--accent);
             border: 4px solid var(--accent);
@@ -357,7 +357,7 @@
             display: flex;
             flex-direction: row;
             gap: 3rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             font-size: 1.8rem;
             color: var(--fg);
         }
@@ -381,10 +381,10 @@
         }
         
         .insight-box {
-            margin: 1rem 0 2rem;
+            margin: 1rem 0 1rem;
             border-top: 2px dashed var(--fg-dim);
             border-bottom: 2px dashed var(--fg-dim);
-            padding: 2rem;
+            padding: 1.5rem;
             text-align: center;
             max-width: 800px;
         }
@@ -393,6 +393,55 @@
             color: var(--fg); 
             font-style: italic; 
             line-height: 1.4;
+        }
+        
+        /* Score Breakdown Box */
+        .score-box {
+            width: 100%;
+            max-width: 500px;
+            background: var(--bg-soft);
+            border: 2px solid var(--fg-dim);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: var(--fg-dim);
+        }
+        .score-row.final {
+            border-top: 2px solid var(--fg);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            color: var(--accent);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .score-penalty { color: var(--red); }
+        
+        .btn-group {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* WPM Chart */
+        .wpm-chart-box {
+            width: 100%;
+            max-width: 700px;
+            height: 120px;
+            margin: 0 auto 1.5rem;
+            border: 2px solid var(--fg-dim);
+            background: #151718;
+            position: relative;
+            cursor: crosshair;
+        }
+        .wpm-chart-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
         #hidden-input { opacity: 0; position: absolute; z-index: -1; }
@@ -447,6 +496,15 @@
         <div class="stat-big" id="res-wpm">0</div>
         <div class="stat-label">Words Per Minute</div>
 
+        <div class="wpm-chart-box">
+            <canvas id="wpm-chart" class="wpm-chart-canvas"></canvas>
+        </div>
+
+        <!-- NEW: Score Breakdown -->
+        <div class="score-box" id="score-breakdown">
+            <!-- Populated via JS -->
+        </div>
+
         <div class="secondary-stats">
             <div class="sec-stat-group">
                 <div class="sec-stat-lbl">Accuracy:</div>
@@ -462,13 +520,18 @@
             <div class="insight-text" id="res-insight"></div>
         </div>
 
-        <button class="btn-pixel" onclick="restartGame()">Next Battle</button>
-        <div class="result-nav-hint" style="margin-top:1rem;">Press <span class="key-hint">ENTER</span></div>
+        <div class="btn-group">
+            <button class="btn-pixel" onclick="retryMission()">RETRY</button>
+            <button class="btn-pixel" onclick="nextMission()">NEXT BATTLE</button>
+        </div>
+        <div class="result-nav-hint" style="margin-top:1rem;">
+            <span class="key-hint">TAB</span> RETRY &nbsp;&nbsp; <span class="key-hint">ENTER</span> NEXT
+        </div>
         <button class="btn-text" style="margin-top:1rem;" onclick="toMenu()">Character Select</button>
     </div>
 
     <script>
-        // --- Data: Masters & Quotes (Expanded to 15+) ---
+        // --- Data: Masters & Quotes (Expanded) ---
         const masters = {
             tzu: {
                 key: 'tzu',
@@ -603,10 +666,12 @@
             liveAcc: document.getElementById('live-acc'),
             statsBar: document.getElementById('stats-bar'), 
             canvas: document.getElementById('battle-canvas'),
+            wpmCanvas: document.getElementById('wpm-chart'),
             resWpm: document.getElementById('res-wpm'),
             resAcc: document.getElementById('res-acc'),
             resTime: document.getElementById('res-time'),
-            resInsight: document.getElementById('res-insight')
+            resInsight: document.getElementById('res-insight'),
+            scoreBreakdown: document.getElementById('score-breakdown')
         };
 
         // --- State ---
@@ -620,7 +685,12 @@
             timer: null,
             history: [],
             isRunning: false,
-            lastQuoteIndex: -1 // Track to prevent repeats
+            lastQuoteIndex: -1,
+            wpmHistory: [],
+            lastCheckIndex: 0,
+            chartData: [], 
+            intervalError: false,
+            totalErrors: 0 // New persistent error counter
         };
 
         // --- Battle System (Canvas Engine) ---
@@ -636,7 +706,7 @@
                 this.enemies = [];
                 this.particles = [];
                 this.floorOffset = 0;
-                this.currentPct = 0; // Physics target percentage
+                this.currentPct = 0; 
                 
                 this.loop = this.loop.bind(this);
                 requestAnimationFrame(this.loop);
@@ -680,46 +750,34 @@
             }
 
             updatePhysics() {
-                // Decrement attack timer
                 if (this.hero.attackTimer > 0) {
                     this.hero.attackTimer -= 1;
                     this.hero.state = 'ATTACK';
                 }
 
-                // Determine target X based on current Progress %
                 const targetX = 20 + (this.currentPct * (this.width - 100));
-                
-                // Hero Movement Physics (Lerp)
                 const diff = targetX - this.hero.x;
                 if (Math.abs(diff) > 1) {
                     this.hero.x += diff * 0.1; 
-                    // Only switch to RUN if not currently locked in ATTACK
                     if (this.hero.attackTimer <= 0) {
                         this.hero.state = 'RUN';
                     }
                     this.floorOffset += diff * 0.1;
                 } else {
-                    this.hero.x = targetX; // Snap
-                    // Only switch to IDLE if not locked in ATTACK
+                    this.hero.x = targetX; 
                     if (this.hero.attackTimer <= 0) {
                         this.hero.state = 'IDLE';
                     }
                 }
 
-                // Enemies
                 this.enemies.forEach(e => {
                     const eX = 20 + (e.xPct * (this.width - 100));
-                    
                     if (e.alive) {
-                        // Logic: Kill Minions on proximity, but BOSS only on 100% completion
                         if (e.type === 'BOSS') {
-                            // Relaxed Boss Kill Logic:
-                            // Check if text is done (1.0) AND Hero is close enough OR past the engagement line (eX - 60)
                             if (this.currentPct >= 1.0 && this.hero.x >= eX - 60) {
                                 this.killEnemy(e, eX);
                             }
                         } else {
-                            // Minions die on touch
                             if (this.hero.x >= eX - 40) {
                                 this.killEnemy(e, eX);
                             }
@@ -731,21 +789,20 @@
             killEnemy(e, x) {
                 e.alive = false;
                 this.hero.state = 'ATTACK';
-                this.hero.attackTimer = 20; // Lock attack for 20 frames (~0.3s)
+                this.hero.attackTimer = 20; 
 
                 const isBoss = e.type === 'BOSS';
-                const pCount = isBoss ? 100 : 20; // Massive splash for boss
+                const pCount = isBoss ? 100 : 20; 
                 const pSpeed = isBoss ? 15 : 8;
 
-                // Spawn particles
                 for(let i=0; i<pCount; i++) {
                     this.particles.push({
                         x: x + 20, y: this.height - 40,
                         vx: (Math.random()-0.5)*pSpeed, 
                         vy: (Math.random()-1.2)*pSpeed,
-                        life: 1.0 + Math.random(), // Longer life
-                        color: (Math.random() > 0.8 ? '#fff' : this.colors.red), // Add gleam
-                        size: (Math.random() * (isBoss ? 6 : 3)) + 2 // Bigger chunks
+                        life: 1.0 + Math.random(), 
+                        color: (Math.random() > 0.8 ? '#fff' : this.colors.red), 
+                        size: (Math.random() * (isBoss ? 6 : 3)) + 2 
                     });
                 }
             }
@@ -753,12 +810,11 @@
             loop() {
                 if (this.width === 0) { requestAnimationFrame(this.loop); return; }
 
-                this.updatePhysics(); // Separate physics step
+                this.updatePhysics(); 
 
                 this.ctx.fillStyle = "#151718"; 
                 this.ctx.fillRect(0,0,this.width, this.height);
 
-                // Floor
                 this.ctx.fillStyle = this.colors.bg;
                 const floorY = this.height - 20;
                 const tileSize = 20;
@@ -767,7 +823,6 @@
                     if (i%2===0) this.ctx.fillRect(drawX, floorY, tileSize, 20);
                 }
 
-                // Enemies
                 this.enemies.forEach(e => {
                     const x = 20 + (e.xPct * (this.width - 100));
                     const y = this.height - 50; 
@@ -779,21 +834,17 @@
                     }
                 });
 
-                // Hero
                 const y = this.height - 50;
                 this.hero.frame += 0.2;
                 
                 if (this.hero.state === 'ATTACK') {
-                    // Draw Hero Frame
                     this.drawSprite(this.hero.x, y, this.colors.accent, 'KNIGHT_ATTACK');
-                    // Draw Slash Effect
                     this.drawSlash(this.hero.x, y);
                 } else {
                     const runBob = this.hero.state === 'RUN' ? Math.abs(Math.sin(this.hero.frame))*5 : 0;
                     this.drawSprite(this.hero.x, y - runBob, this.colors.accent, 'KNIGHT');
                 }
 
-                // Particles
                 this.particles.forEach((p, i) => {
                     p.x += p.vx; p.y += p.vy; p.vy += 0.5; p.life -= 0.03;
                     this.ctx.fillStyle = p.color;
@@ -806,12 +857,10 @@
                 requestAnimationFrame(this.loop);
             }
 
-            // Draw Swipe/Slash Arc
             drawSlash(x, y) {
                 this.ctx.fillStyle = '#fff';
                 this.ctx.globalAlpha = 0.8;
                 this.ctx.beginPath();
-                // Simple arc shape relative to hero
                 this.ctx.moveTo(x + 40, y - 10);
                 this.ctx.quadraticCurveTo(x + 90, y + 20, x + 40, y + 50);
                 this.ctx.quadraticCurveTo(x + 70, y + 20, x + 40, y - 10);
@@ -820,7 +869,7 @@
             }
 
             drawSprite(x, y, color, type) {
-                const s = 4; // Scale
+                const s = 4; 
                 this.ctx.fillStyle = color;
                 const dark = '#1d2021';
                 
@@ -836,7 +885,7 @@
                     this.ctx.fillRect(x+1*s, y+2*s, 3*s, 3*s); 
                     this.ctx.fillRect(x+1*s, y, 3*s, 2*s); 
                     this.ctx.fillStyle = '#ebdbb2';
-                    this.ctx.fillRect(x+4*s, y+2*s, 4*s, 1*s); // Sword forward
+                    this.ctx.fillRect(x+4*s, y+2*s, 4*s, 1*s); 
                 }
                 else if (type === 'SKULL') {
                     this.ctx.fillStyle = color;
@@ -883,7 +932,7 @@
             state.master = masters[key];
             els.root.style.setProperty('--accent', state.master.color);
             els.masterIndicator.innerText = state.master.role;
-            state.lastQuoteIndex = -1; // Reset quote history on master change
+            state.lastQuoteIndex = -1; 
             
             els.selectionScreen.classList.add('hidden');
             els.typingScreen.classList.remove('hidden');
@@ -908,6 +957,11 @@
             state.startTime = null;
             state.isRunning = false;
             state.history = [];
+            state.wpmHistory = [];
+            state.chartData = []; 
+            state.intervalError = false;
+            state.lastCheckIndex = 0;
+            state.totalErrors = 0; // Reset errors
             els.hiddenInput.value = '';
             els.statsBar.style.opacity = '0.5';
             
@@ -918,7 +972,6 @@
             if (quoteIndex !== null) {
                 qIdx = quoteIndex;
             } else {
-                // If random, ensure it's not the same as last time (if possible)
                 if (list.length > 1) {
                     do {
                         qIdx = Math.floor(Math.random() * list.length);
@@ -928,7 +981,7 @@
                 }
             }
             
-            state.lastQuoteIndex = qIdx; // Remember this quote
+            state.lastQuoteIndex = qIdx; 
             const q = list[qIdx];
             state.text = q.text;
             state.insight = q.insight;
@@ -946,14 +999,15 @@
                     span.className = 'letter';
                     span.innerText = c;
                     wDiv.appendChild(span);
-                    state.words.push({ char: c, el: span });
+                    // Add 'word' property for mapping
+                    state.words.push({ char: c, el: span, word: w });
                 });
                 if (wIdx < words.length - 1) {
                     const sSpan = document.createElement('span');
                     sSpan.className = 'letter';
                     sSpan.innerHTML = '&nbsp;';
                     wDiv.appendChild(sSpan);
-                    state.words.push({ char: ' ', el: sSpan });
+                    state.words.push({ char: ' ', el: sSpan, word: ' ' });
                 }
                 els.wordsContainer.appendChild(wDiv);
             });
@@ -970,6 +1024,17 @@
             updateCaret();
         }
 
+        // New Helper Functions
+        function retryMission() {
+            els.resultsScreen.classList.add('hidden');
+            initGame(state.lastQuoteIndex); 
+        }
+
+        function nextMission() {
+            els.resultsScreen.classList.add('hidden');
+            initGame(null); 
+        }
+
         // --- Logic: Typing Engine ---
 
         document.addEventListener('keydown', e => {
@@ -978,13 +1043,14 @@
                 return;
             }
             if (!els.resultsScreen.classList.contains('hidden')) {
-                if(e.key === 'Enter') restartGame();
+                if(e.key === 'Enter') nextMission(); 
+                if(e.key === 'Tab') { e.preventDefault(); retryMission(); } 
                 if(e.key === 'Escape') toMenu();
                 return;
             }
             if (els.typingScreen.classList.contains('hidden')) return;
 
-            if (e.key === 'Tab') { e.preventDefault(); restartGame(); }
+            if (e.key === 'Tab') { e.preventDefault(); retryMission(); } 
             if (e.key === 'Escape') toMenu();
             els.hiddenInput.focus();
         });
@@ -1019,6 +1085,8 @@
                 } else {
                     target.el.classList.add('incorrect');
                     state.history.push(false);
+                    state.intervalError = true; 
+                    state.totalErrors++; // Increment persistence error counter
                 }
                 state.charIndex++;
             }
@@ -1046,11 +1114,172 @@
             if (state.timer) clearInterval(state.timer);
             state.timer = setInterval(() => {
                 if (!state.isRunning) return;
+                
+                // Interval WPM Logic (Every 500ms)
+                const chars = state.charIndex - state.lastCheckIndex;
+                const intervalWpm = Math.max(0, Math.round((chars / 5) / (0.5 / 60))); 
+                
+                // Find Current Word for Data
+                let idx = state.charIndex - 1;
+                if (idx < 0) idx = 0;
+                
+                let currentItem = state.words[idx];
+                
+                if (currentItem && currentItem.word === ' ' && idx > 0) {
+                    currentItem = state.words[idx - 1];
+                }
+
+                const currentWord = currentItem ? currentItem.word : "";
+
+                state.chartData.push({
+                    wpm: intervalWpm,
+                    word: currentWord,
+                    error: state.intervalError
+                });
+                
+                // Reset interval trackers
+                state.intervalError = false; 
+                state.lastCheckIndex = state.charIndex;
+
+                // Live WPM Display
                 const mins = (Date.now() - state.startTime) / 60000;
                 const wpm = Math.round((state.charIndex/5) / mins) || 0;
                 els.liveWpm.innerText = wpm;
             }, 500);
         }
+
+        // --- Chart & Interaction ---
+        
+        let chartHoverX = null;
+
+        function drawWpmChart(hoverX = null) {
+            const cvs = els.wpmCanvas;
+            const ctx = cvs.getContext('2d');
+            
+            // Fix resolution
+            const rect = cvs.getBoundingClientRect();
+            cvs.width = rect.width;
+            cvs.height = rect.height;
+            
+            const w = cvs.width;
+            const h = cvs.height;
+            const data = state.chartData;
+            const accent = state.master.color;
+            const red = '#cc241d';
+
+            // Background
+            ctx.fillStyle = '#1d2021';
+            ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = '#3c3836';
+            ctx.lineWidth = 1;
+            
+            // Grid Lines
+            for(let i=0; i<5; i++) {
+                let y = (h/4)*i;
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+
+            if (data.length < 2) return;
+
+            // Calculate Scale
+            const maxWpm = Math.max(100, ...data.map(d => d.wpm)) + 10;
+            const xStep = w / (data.length - 1);
+
+            // Draw Line
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            data.forEach((d, i) => {
+                const x = i * xStep;
+                const y = h - ((d.wpm / maxWpm) * h);
+                if (i===0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Draw Fill
+            ctx.lineTo(w, h);
+            ctx.lineTo(0, h);
+            ctx.fillStyle = accent + '33'; 
+            ctx.fill();
+
+            // Draw Error Markers (X)
+            ctx.strokeStyle = red;
+            ctx.lineWidth = 2;
+            data.forEach((d, i) => {
+                if (d.error) {
+                    const x = i * xStep;
+                    const y = h - ((d.wpm / maxWpm) * h);
+                    // Draw X
+                    ctx.beginPath();
+                    ctx.moveTo(x-4, y-4); ctx.lineTo(x+4, y+4);
+                    ctx.moveTo(x+4, y-4); ctx.lineTo(x-4, y+4);
+                    ctx.stroke();
+                }
+            });
+
+            // Draw Hover Tooltip
+            if (hoverX !== null) {
+                // Find closest index
+                const idx = Math.min(Math.max(0, Math.round(hoverX / xStep)), data.length - 1);
+                const d = data[idx];
+                const x = idx * xStep;
+                const y = h - ((d.wpm / maxWpm) * h);
+
+                // Cursor Line
+                ctx.strokeStyle = '#ebdbb2';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Point
+                ctx.fillStyle = '#ebdbb2';
+                ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.fill();
+
+                // Dynamic Tooltip Box
+                const isSpace = !d.word || d.word === ' ';
+                const tipW = 100;
+                const tipH = isSpace ? 30 : 50; // Smaller box if no word shown
+                let tipX = x + 10;
+                let tipY = y - 60;
+                
+                // Boundaries
+                if (tipX + tipW > w) tipX = x - 110;
+                if (tipY < 0) tipY = y + 20;
+
+                ctx.fillStyle = '#282828';
+                ctx.strokeStyle = accent;
+                ctx.lineWidth = 2;
+                ctx.fillRect(tipX, tipY, tipW, tipH);
+                ctx.strokeRect(tipX, tipY, tipW, tipH);
+
+                // Text
+                ctx.fillStyle = '#ebdbb2';
+                ctx.font = '16px VT323';
+                ctx.textAlign = 'left';
+                ctx.fillText(`WPM: ${d.wpm}`, tipX + 10, tipY + 20);
+                
+                if (!isSpace) {
+                    // Truncate word if too long
+                    let wordDisp = d.word.length > 10 ? d.word.substr(0,9) + '..' : d.word;
+                    ctx.fillText(`Word: ${wordDisp}`, tipX + 10, tipY + 40);
+                }
+            }
+        }
+
+        // Add Interaction Listeners
+        els.wpmCanvas.addEventListener('mousemove', (e) => {
+            const rect = els.wpmCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            drawWpmChart(x);
+        });
+
+        els.wpmCanvas.addEventListener('mouseleave', () => {
+            drawWpmChart(null);
+        });
+
 
         function endGame() {
             state.isRunning = false;
@@ -1059,6 +1288,14 @@
             const wpm = Math.round((state.words.length/5) / (time/60));
             const acc = Math.round((state.history.filter(Boolean).length / state.words.length) * 100);
 
+            // --- Score Calculation ---
+            // Base Score: Speed * 50 + Length * 10
+            const baseScore = Math.round((wpm * 50) + (state.words.length * 10));
+            // Penalty: 150 points per ANY error made
+            const penalty = state.totalErrors * 150;
+            // Final Score: Can't go below 0
+            const finalScore = Math.max(0, baseScore - penalty);
+
             battle.updateProgress(1.0);
 
             setTimeout(() => {
@@ -1066,7 +1303,25 @@
                 els.resAcc.innerText = acc + '%';
                 els.resTime.innerText = time.toFixed(1) + 's';
                 els.resInsight.innerText = state.insight;
+                
+                // Render Score Box
+                els.scoreBreakdown.innerHTML = `
+                    <div class="score-row">
+                        <span>Base Score (Speed & Length)</span>
+                        <span>${baseScore}</span>
+                    </div>
+                    <div class="score-row score-penalty">
+                        <span>Penalty (${state.totalErrors} Errors)</span>
+                        <span>-${penalty}</span>
+                    </div>
+                    <div class="score-row final">
+                        <span>FINAL SCORE</span>
+                        <span>${finalScore}</span>
+                    </div>
+                `;
+
                 els.resultsScreen.classList.remove('hidden');
+                drawWpmChart(); // Initial Draw
             }, 1000);
         }
 
@@ -1101,6 +1356,8 @@
             if (!els.typingScreen.classList.contains('hidden')) {
                 battle.resize();
                 updateCaret();
+                // Redraw chart if visible (results screen)
+                if(!els.resultsScreen.classList.contains('hidden')) drawWpmChart();
             }
         });
 
