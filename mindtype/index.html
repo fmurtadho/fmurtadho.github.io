@@ -20,6 +20,7 @@
             --purple: #b16286;
             --aqua: #689d6a;
             --orange: #d65d0e;
+            --gray: #a89984;
             
             /* Dynamic Accent */
             --accent: #d79921; 
@@ -341,8 +342,8 @@
 
         /* Updated Results Stats Styles */
         .stat-big { 
-            font-size: 8rem; 
-            line-height: 1; 
+            font-size: 7rem; 
+            line-height: 0.9; 
             color: var(--accent); 
             margin-bottom: 0; 
         }
@@ -350,29 +351,31 @@
             font-size: 1.5rem; 
             color: var(--fg-dim); 
             text-transform: uppercase; 
-            margin-bottom: 2rem; 
+            margin-bottom: 1rem; 
         }
         
         .secondary-stats {
             display: flex;
             flex-direction: row;
-            gap: 3rem;
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
             color: var(--fg);
+            width: 100%;
         }
         
         .sec-stat-group { 
             display: flex;
             flex-direction: row;
-            align-items: baseline;
-            gap: 0.75rem;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         .sec-stat-lbl { 
             color: var(--fg-dim); 
             text-transform: uppercase;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
         }
         
         .sec-stat-val {
@@ -380,59 +383,43 @@
             font-weight: bold;
         }
         
-        .insight-box {
-            margin: 1rem 0 1rem;
-            border-top: 2px dashed var(--fg-dim);
-            border-bottom: 2px dashed var(--fg-dim);
+        /* Updated Insight Box Styles */
+        .insight-box { /* Kept for structural reference if needed, but unused in new layout */
+            margin: 1rem 0;
             padding: 1.5rem;
             text-align: center;
-            max-width: 800px;
-        }
-        .insight-text { 
-            font-size: 1.6rem; 
-            color: var(--fg); 
-            font-style: italic; 
-            line-height: 1.4;
+            max-width: 100%;
         }
         
-        /* Score Breakdown Box */
-        .score-box {
-            width: 100%;
-            max-width: 500px;
-            background: var(--bg-soft);
-            border: 2px solid var(--fg-dim);
-            padding: 1rem;
-            margin-bottom: 1rem;
+        .insight-text { 
+            font-size: 1.8rem; /* Larger font */
+            color: var(--accent); /* Pop with accent color */
+            font-style: italic; 
+            line-height: 1.4;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
+        }
+        
+        .insight-source {
+            display: block;
+            margin-top: 0.8rem;
             font-size: 1.2rem;
-        }
-        .score-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
             color: var(--fg-dim);
+            font-style: normal;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .score-row.final {
-            border-top: 2px solid var(--fg);
-            margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            color: var(--accent);
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .score-penalty { color: var(--red); }
         
         .btn-group {
             display: flex;
             gap: 1.5rem;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
         }
 
         /* WPM Chart */
         .wpm-chart-box {
             width: 100%;
-            max-width: 700px;
-            height: 120px;
-            margin: 0 auto 1.5rem;
+            height: 180px; 
+            margin: 0;
             border: 2px solid var(--fg-dim);
             background: #151718;
             position: relative;
@@ -442,6 +429,80 @@
             width: 100%;
             height: 100%;
             display: block;
+        }
+        
+        /* Score Box */
+        .score-box {
+            width: 100%;
+            background: var(--bg-soft);
+            border: 2px solid var(--fg-dim);
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+            color: var(--fg-dim);
+        }
+        .score-row.final {
+            border-top: 2px solid var(--fg);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            color: var(--accent);
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        .score-penalty { color: var(--red); }
+        
+        /* Results Grid */
+        .results-container {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr; /* Chart bigger, Stats smaller */
+            grid-template-rows: auto auto auto auto;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 900px;
+            background: var(--bg-hard);
+            border: 4px solid var(--fg-dim);
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            align-items: center; /* Vertically center items */
+        }
+        .results-header { grid-column: 1 / -1; text-align: center; border-bottom: 2px dashed var(--bg-soft); padding-bottom: 1rem; margin-bottom: 0.5rem; }
+        
+        .results-chart-area { 
+            grid-column: 1 / 2; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+            height: 100%;
+        }
+        
+        .results-stats-area { 
+            grid-column: 2 / 3; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.5rem;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        /* Updated Insight Area in Grid */
+        .results-insight-area { 
+            grid-column: 1 / -1; 
+            margin-top: 1rem;
+            text-align: center; /* Center alignment */
+            border-top: 2px dashed var(--fg-dim);
+            border-bottom: 2px dashed var(--fg-dim);
+            padding: 2rem 1rem;
+            background: rgba(0,0,0,0.1); /* Subtle background to make it pop */
+        }
+        .results-actions { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+        
+        @media (max-width: 700px) {
+            .results-container { grid-template-columns: 1fr; }
+            .results-chart-area, .results-stats-area { grid-column: 1 / -1; }
         }
 
         #hidden-input { opacity: 0; position: absolute; z-index: -1; }
@@ -493,45 +554,58 @@
 
     <!-- Screen 4: Results -->
     <div id="results-screen" class="overlay hidden">
-        <div class="stat-big" id="res-wpm">0</div>
-        <div class="stat-label">Words Per Minute</div>
-
-        <div class="wpm-chart-box">
-            <canvas id="wpm-chart" class="wpm-chart-canvas"></canvas>
-        </div>
-
-        <!-- NEW: Score Breakdown -->
-        <div class="score-box" id="score-breakdown">
-            <!-- Populated via JS -->
-        </div>
-
-        <div class="secondary-stats">
-            <div class="sec-stat-group">
-                <div class="sec-stat-lbl">Accuracy:</div>
-                <div class="sec-stat-val" id="res-acc">0%</div>
+        <div class="results-container">
+            <!-- Header -->
+            <div class="results-header">
+                <div class="stat-big" id="res-wpm">0</div>
+                <div class="stat-label" style="margin:0;">WPM</div>
             </div>
-            <div class="sec-stat-group">
-                <div class="sec-stat-lbl">Time:</div>
-                <div class="sec-stat-val" id="res-time">0s</div>
+
+            <!-- Left: Chart -->
+            <div class="results-chart-area">
+                <div class="wpm-chart-box">
+                    <canvas id="wpm-chart" class="wpm-chart-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Right: Stats & Score -->
+            <div class="results-stats-area">
+                <div class="secondary-stats">
+                    <div class="sec-stat-group">
+                        <span class="sec-stat-lbl">ACC:</span>
+                        <span class="sec-stat-val" id="res-acc">0%</span>
+                    </div>
+                    <div class="sec-stat-group">
+                        <span class="sec-stat-lbl">TIME:</span>
+                        <span class="sec-stat-val" id="res-time">0s</span>
+                    </div>
+                </div>
+                <div class="score-box" id="score-breakdown">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Bottom: Insight -->
+            <div class="results-insight-area">
+                <div class="insight-text" id="res-insight"></div>
+            </div>
+
+            <!-- Footer: Actions -->
+            <div class="results-actions">
+                <div class="btn-group">
+                    <button class="btn-pixel" onclick="retryMission()">RETRY</button>
+                    <button class="btn-pixel" onclick="nextMission()">NEXT BATTLE</button>
+                </div>
+                <div class="result-nav-hint">
+                    <span class="key-hint">TAB</span> RETRY &nbsp;&nbsp; <span class="key-hint">ENTER</span> NEXT
+                </div>
+                <button class="btn-text" style="margin-top:0.5rem;" onclick="toMenu()">Character Select</button>
             </div>
         </div>
-
-        <div class="insight-box">
-            <div class="insight-text" id="res-insight"></div>
-        </div>
-
-        <div class="btn-group">
-            <button class="btn-pixel" onclick="retryMission()">RETRY</button>
-            <button class="btn-pixel" onclick="nextMission()">NEXT BATTLE</button>
-        </div>
-        <div class="result-nav-hint" style="margin-top:1rem;">
-            <span class="key-hint">TAB</span> RETRY &nbsp;&nbsp; <span class="key-hint">ENTER</span> NEXT
-        </div>
-        <button class="btn-text" style="margin-top:1rem;" onclick="toMenu()">Character Select</button>
     </div>
 
     <script>
-        // --- Data: Masters & Quotes (Expanded) ---
+        // --- Data: Masters & Quotes & Sources ---
         const masters = {
             tzu: {
                 key: 'tzu',
@@ -539,21 +613,21 @@
                 role: "The General",
                 color: "#d79921",
                 quotes: [
-                    { text: "The supreme art of war is to subdue the enemy without fighting.", insight: "Strategy beats force." },
-                    { text: "In the midst of chaos, there is also opportunity.", insight: "Look for openings when others panic." },
-                    { text: "Appear weak when you are strong, and strong when you are weak.", insight: "Deception is key to warfare." },
-                    { text: "Victorious warriors win first and then go to war, while defeated warriors go to war first and then seek to win.", insight: "Preparation determines the outcome." },
-                    { text: "Even the finest sword plunged into salt water will eventually rust.", insight: "Maintain your skills and tools." },
-                    { text: "Treat your men as you would your own beloved sons. And they will follow you into the deepest valley.", insight: "Loyalty is earned through care." },
-                    { text: "Move swift as the Wind and closely-formed as the Wood. Attack like the Fire and be still as the Mountain.", insight: "Adapt your nature to the situation." },
-                    { text: "Opportunities multiply as they are seized.", insight: "Action creates momentum." },
-                    { text: "The greatest victory is that which requires no battle.", insight: "Peace is the ultimate strategic goal." },
-                    { text: "If you wait by the river long enough, the bodies of your enemies will float by.", insight: "Patience allows time to defeat your foes." },
-                    { text: "He who wishes to fight must first count the cost.", insight: "Understand the price of conflict." },
-                    { text: "To know your Enemy, you must become your Enemy.", insight: "Empathy leads to prediction." },
-                    { text: "Strategy without tactics is the slowest route to victory. Tactics without strategy is the noise before defeat.", insight: "Vision needs action; action needs vision." },
-                    { text: "Build your opponent a golden bridge to retreat across.", insight: "Desperate enemies fight harder; leave them an exit." },
-                    { text: "Sweat more during peace: bleed less during war.", insight: "Hard training prevents hard losses." }
+                    { text: "The supreme art of war is to subdue the enemy without fighting.", insight: "Strategy beats force.", source: "The Art of War" },
+                    { text: "In the midst of chaos, there is also opportunity.", insight: "Look for openings when others panic.", source: "The Art of War" },
+                    { text: "Appear weak when you are strong, and strong when you are weak.", insight: "Deception is key to warfare.", source: "The Art of War" },
+                    { text: "Victorious warriors win first and then go to war, while defeated warriors go to war first and then seek to win.", insight: "Preparation determines the outcome.", source: "The Art of War" },
+                    { text: "Even the finest sword plunged into salt water will eventually rust.", insight: "Maintain your skills and tools.", source: "The Art of War" },
+                    { text: "Treat your men as you would your own beloved sons. And they will follow you into the deepest valley.", insight: "Loyalty is earned through care.", source: "The Art of War" },
+                    { text: "Move swift as the Wind and closely-formed as the Wood. Attack like the Fire and be still as the Mountain.", insight: "Adapt your nature to the situation.", source: "The Art of War" },
+                    { text: "Opportunities multiply as they are seized.", insight: "Action creates momentum.", source: "The Art of War" },
+                    { text: "The greatest victory is that which requires no battle.", insight: "Peace is the ultimate strategic goal.", source: "The Art of War" },
+                    { text: "If you wait by the river long enough, the bodies of your enemies will float by.", insight: "Patience allows time to defeat your foes.", source: "The Art of War" },
+                    { text: "He who wishes to fight must first count the cost.", insight: "Understand the price of conflict.", source: "The Art of War" },
+                    { text: "To know your Enemy, you must become your Enemy.", insight: "Empathy leads to prediction.", source: "The Art of War" },
+                    { text: "Strategy without tactics is the slowest route to victory. Tactics without strategy is the noise before defeat.", insight: "Vision needs action; action needs vision.", source: "The Art of War" },
+                    { text: "Build your opponent a golden bridge to retreat across.", insight: "Desperate enemies fight harder; leave them an exit.", source: "The Art of War" },
+                    { text: "Sweat more during peace: bleed less during war.", insight: "Hard training prevents hard losses.", source: "The Art of War" }
                 ]
             },
             laotzu: {
@@ -562,21 +636,21 @@
                 role: "The Sage",
                 color: "#98971a",
                 quotes: [
-                    { text: "Nature does not hurry, yet everything is accomplished.", insight: "Patience aligns with the Tao." },
-                    { text: "The journey of a thousand miles begins with a single step.", insight: "Focus on the start, not the distance." },
-                    { text: "Knowing others is intelligence; knowing yourself is true wisdom.", insight: "Self-awareness is the ultimate power." },
-                    { text: "He who knows that enough is enough will always have enough.", insight: "Contentment is true wealth." },
-                    { text: "Act without expectation.", insight: "Detach from the outcome to find peace." },
-                    { text: "Silence is a source of great strength.", insight: "In stillness, power accumulates." },
-                    { text: "If you are depressed you are living in the past. If you are anxious you are living in the future.", insight: "Presence is the cure for suffering." },
-                    { text: "Be content with what you have; rejoice in the way things are.", insight: "Acceptance opens the world to you." },
-                    { text: "The truth is not always beautiful, nor beautiful words the truth.", insight: "Reality is often plain or harsh." },
-                    { text: "A leader is best when people barely know he exists.", insight: "True leadership empowers others, not the self." },
-                    { text: "When I let go of what I am, I become what I might be.", insight: "Release your identity to find your potential." },
-                    { text: "Great acts are made up of small deeds.", insight: "Consistency builds greatness." },
-                    { text: "Anticipate the difficult by managing the easy.", insight: "Solve problems before they become crises." },
-                    { text: "He who conquers others is strong; he who conquers himself is mighty.", insight: "Internal victory is the hardest battle." },
-                    { text: "Kindness in words creates confidence. Kindness in giving creates love.", insight: "Benevolence is a creative force." }
+                    { text: "Nature does not hurry, yet everything is accomplished.", insight: "Patience aligns with the Tao.", source: "Tao Te Ching" },
+                    { text: "The journey of a thousand miles begins with a single step.", insight: "Focus on the start, not the distance.", source: "Tao Te Ching" },
+                    { text: "Knowing others is intelligence; knowing yourself is true wisdom.", insight: "Self-awareness is the ultimate power.", source: "Tao Te Ching" },
+                    { text: "He who knows that enough is enough will always have enough.", insight: "Contentment is true wealth.", source: "Tao Te Ching" },
+                    { text: "Act without expectation.", insight: "Detach from the outcome to find peace.", source: "Tao Te Ching" },
+                    { text: "Silence is a source of great strength.", insight: "In stillness, power accumulates.", source: "Tao Te Ching" },
+                    { text: "If you are depressed you are living in the past. If you are anxious you are living in the future.", insight: "Presence is the cure for suffering.", source: "Tao Te Ching" },
+                    { text: "Be content with what you have; rejoice in the way things are.", insight: "Acceptance opens the world to you.", source: "Tao Te Ching" },
+                    { text: "The truth is not always beautiful, nor beautiful words the truth.", insight: "Reality is often plain or harsh.", source: "Tao Te Ching" },
+                    { text: "A leader is best when people barely know he exists.", insight: "True leadership empowers others, not the self.", source: "Tao Te Ching" },
+                    { text: "When I let go of what I am, I become what I might be.", insight: "Release your identity to find your potential.", source: "Tao Te Ching" },
+                    { text: "Great acts are made up of small deeds.", insight: "Consistency builds greatness.", source: "Tao Te Ching" },
+                    { text: "Anticipate the difficult by managing the easy.", insight: "Solve problems before they become crises.", source: "Tao Te Ching" },
+                    { text: "He who conquers others is strong; he who conquers himself is mighty.", insight: "Internal victory is the hardest battle.", source: "Tao Te Ching" },
+                    { text: "Kindness in words creates confidence. Kindness in giving creates love.", insight: "Benevolence is a creative force.", source: "Tao Te Ching" }
                 ]
             },
             musashi: {
@@ -585,21 +659,21 @@
                 role: "The Ronin",
                 color: "#458588",
                 quotes: [
-                    { text: "Think lightly of yourself and deeply of the world.", insight: "Remove ego to see clearly." },
-                    { text: "Do not regret what you have done.", insight: "Accept the past to move forward." },
-                    { text: "There is more than one path to the top of the mountain.", insight: "Be adaptable in your methods." },
-                    { text: "Get beyond love and grief: exist for the good of Man.", insight: "Detachment brings clarity." },
-                    { text: "You can only fight the way you practice.", insight: " habits define performance." },
-                    { text: "Today is victory over yourself of yesterday; tomorrow is your victory over lesser men.", insight: "Constant self-improvement is the goal." },
-                    { text: "Truth is not what you want it to be; it is what it is.", insight: "Accept reality without delusion." },
-                    { text: "Generally speaking, the Way of the warrior is resolute acceptance of death.", insight: "Fearlessness comes from acceptance." },
-                    { text: "In battles, if you make your opponent flinch, you have already won.", insight: "Psychological dominance precedes physical victory." },
-                    { text: "If you wish to control others you must first control yourself.", insight: "Mastery begins within." },
-                    { text: "It is difficult to understand the universe if you only study one planet.", insight: "Broaden your perspective." },
-                    { text: "Do not hold on to possessions you no longer need.", insight: "Travel light in life." },
-                    { text: "Perceive that which cannot be seen with the eye.", insight: "Intuition is a warrior's tool." },
-                    { text: "Do nothing which is of no use.", insight: "Efficiency is a lifestyle." },
-                    { text: "Step by step walk the thousand-mile road.", insight: "Persistence conquers distance." }
+                    { text: "Think lightly of yourself and deeply of the world.", insight: "Remove ego to see clearly.", source: "The Book of Five Rings" },
+                    { text: "Do not regret what you have done.", insight: "Accept the past to move forward.", source: "The Book of Five Rings" },
+                    { text: "There is more than one path to the top of the mountain.", insight: "Be adaptable in your methods.", source: "The Book of Five Rings" },
+                    { text: "Get beyond love and grief: exist for the good of Man.", insight: "Detachment brings clarity.", source: "The Book of Five Rings" },
+                    { text: "You can only fight the way you practice.", insight: " habits define performance.", source: "The Book of Five Rings" },
+                    { text: "Today is victory over yourself of yesterday; tomorrow is your victory over lesser men.", insight: "Constant self-improvement is the goal.", source: "The Book of Five Rings" },
+                    { text: "Truth is not what you want it to be; it is what it is.", insight: "Accept reality without delusion.", source: "The Book of Five Rings" },
+                    { text: "Generally speaking, the Way of the warrior is resolute acceptance of death.", insight: "Fearlessness comes from acceptance.", source: "The Book of Five Rings" },
+                    { text: "In battles, if you make your opponent flinch, you have already won.", insight: "Psychological dominance precedes physical victory.", source: "The Book of Five Rings" },
+                    { text: "If you wish to control others you must first control yourself.", insight: "Mastery begins within.", source: "The Book of Five Rings" },
+                    { text: "It is difficult to understand the universe if you only study one planet.", insight: "Broaden your perspective.", source: "The Book of Five Rings" },
+                    { text: "Do not hold on to possessions you no longer need.", insight: "Travel light in life.", source: "The Book of Five Rings" },
+                    { text: "Perceive that which cannot be seen with the eye.", insight: "Intuition is a warrior's tool.", source: "The Book of Five Rings" },
+                    { text: "Do nothing which is of no use.", insight: "Efficiency is a lifestyle.", source: "The Book of Five Rings" },
+                    { text: "Step by step walk the thousand-mile road.", insight: "Persistence conquers distance.", source: "The Book of Five Rings" }
                 ]
             },
             nietzsche: {
@@ -608,21 +682,21 @@
                 role: "The Prophet",
                 color: "#b16286",
                 quotes: [
-                    { text: "He who has a why to live for can bear almost any how.", insight: "Purpose fuels endurance." },
-                    { text: "That which does not kill us makes us stronger.", insight: "Adversity builds character." },
-                    { text: "And if you gaze long enough into an abyss, the abyss will gaze back into you.", insight: "Be careful what you fight." },
-                    { text: "The individual has always had to struggle to keep from being overwhelmed by the tribe.", insight: "Authenticity requires courage." },
-                    { text: "He who fights with monsters should look to it that he himself does not become a monster.", insight: "Guard your soul in conflict." },
-                    { text: "The snake which cannot cast its skin has to die.", insight: "Change is necessary for survival." },
-                    { text: "Sometimes people don't want to hear the truth because they don't want their illusions destroyed.", insight: "Comfort is often preferred over reality." },
-                    { text: "It is not a lack of love, but a lack of friendship that makes unhappy marriages.", insight: "Companionship sustains relationships." },
-                    { text: "You shall become the person you are.", insight: "Self-actualization is a duty." },
-                    { text: "There is always some madness in love. But there is also always some reason in madness.", insight: "Emotion has its own logic." },
-                    { text: "No price is too high to pay for the privilege of owning yourself.", insight: "Freedom is the highest value." },
-                    { text: "Without music, life would be a mistake.", insight: "Art is essential for existence." },
-                    { text: "One must still have chaos in oneself to be able to give birth to a dancing star.", insight: "Creativity requires inner turmoil." },
-                    { text: "To live is to suffer, to survive is to find some meaning in the suffering.", insight: "Meaning transforms pain." },
-                    { text: "All things are subject to interpretation whichever interpretation prevails is a function of power.", insight: "Truth is often defined by the victor." }
+                    { text: "He who has a why to live for can bear almost any how.", insight: "Purpose fuels endurance.", source: "Twilight of the Idols" },
+                    { text: "That which does not kill us makes us stronger.", insight: "Adversity builds character.", source: "Twilight of the Idols" },
+                    { text: "And if you gaze long enough into an abyss, the abyss will gaze back into you.", insight: "Be careful what you fight.", source: "Beyond Good and Evil" },
+                    { text: "The individual has always had to struggle to keep from being overwhelmed by the tribe.", insight: "Authenticity requires courage.", source: "Selected Works" },
+                    { text: "He who fights with monsters should look to it that he himself does not become a monster.", insight: "Guard your soul in conflict.", source: "Beyond Good and Evil" },
+                    { text: "The snake which cannot cast its skin has to die.", insight: "Change is necessary for survival.", source: "Dawn" },
+                    { text: "Sometimes people don't want to hear the truth because they don't want their illusions destroyed.", insight: "Comfort is often preferred over reality.", source: "Selected Works" },
+                    { text: "It is not a lack of love, but a lack of friendship that makes unhappy marriages.", insight: "Companionship sustains relationships.", source: "Thus Spoke Zarathustra" },
+                    { text: "You shall become the person you are.", insight: "Self-actualization is a duty.", source: "The Gay Science" },
+                    { text: "There is always some madness in love. But there is also always some reason in madness.", insight: "Emotion has its own logic.", source: "Thus Spoke Zarathustra" },
+                    { text: "No price is too high to pay for the privilege of owning yourself.", insight: "Freedom is the highest value.", source: "Selected Works" },
+                    { text: "Without music, life would be a mistake.", insight: "Art is essential for existence.", source: "Twilight of the Idols" },
+                    { text: "One must still have chaos in oneself to be able to give birth to a dancing star.", insight: "Creativity requires inner turmoil.", source: "Thus Spoke Zarathustra" },
+                    { text: "To live is to suffer, to survive is to find some meaning in the suffering.", insight: "Meaning transforms pain.", source: "Selected Works" },
+                    { text: "All things are subject to interpretation whichever interpretation prevails is a function of power.", insight: "Truth is often defined by the victor.", source: "The Will to Power" }
                 ]
             },
             machiavelli: {
@@ -631,21 +705,90 @@
                 role: "The Prince",
                 color: "#cc241d",
                 quotes: [
-                    { text: "It is better to be feared than loved, if you cannot be both.", insight: "Control is more reliable than affection." },
-                    { text: "Never attempt to win by force what can be won by deception.", insight: "Efficiency over brute strength." },
-                    { text: "The first method for estimating the intelligence of a ruler is to look at the men he has around him.", insight: "Your company defines your capability." },
-                    { text: "Where the willingness is great, the difficulties cannot be great.", insight: "Willpower overcomes obstacles." },
-                    { text: "Entrepreneurs are simply those who understand that there is little difference between obstacle and opportunity.", insight: "Perspective shifts reality." },
-                    { text: "Everyone sees what you appear to be, few experience what you really are.", insight: "Image is power." },
-                    { text: "The lion cannot protect himself from traps, and the fox cannot defend himself from wolves.", insight: "Combine strength with cunning." },
-                    { text: "There is no other way to guard yourself against flattery than by making men understand that telling you the truth will not offend you.", insight: "Encourage honesty to avoid delusion." },
-                    { text: "A prudent man should always follow in the footsteps of great men.", insight: "Learn from those who succeeded before." },
-                    { text: "He who wishes to be obeyed must know how to command.", insight: "Authority requires competence." },
-                    { text: "Men are so simple and so much inclined to obey immediate needs that a deceiver will never lack victims.", insight: "People are easily manipulated by desire." },
-                    { text: "Politics have no relation to morals.", insight: "Pragmatism ignores ethics." },
-                    { text: "The promise given was a necessity of the past: the word broken is a necessity of the present.", insight: "Adaptability supersedes consistency." },
-                    { text: "It is double pleasure to deceive the deceiver.", insight: "Outsmarting a fox is satisfying." },
-                    { text: "Hatred is gained as much by good works as by evil.", insight: "Action always invites reaction." }
+                    { text: "It is better to be feared than loved, if you cannot be both.", insight: "Control is more reliable than affection.", source: "The Prince" },
+                    { text: "Never attempt to win by force what can be won by deception.", insight: "Efficiency over brute strength.", source: "The Prince" },
+                    { text: "The first method for estimating the intelligence of a ruler is to look at the men he has around him.", insight: "Your company defines your capability.", source: "The Prince" },
+                    { text: "Where the willingness is great, the difficulties cannot be great.", insight: "Willpower overcomes obstacles.", source: "The Prince" },
+                    { text: "Entrepreneurs are simply those who understand that there is little difference between obstacle and opportunity.", insight: "Perspective shifts reality.", source: "The Prince" },
+                    { text: "Everyone sees what you appear to be, few experience what you really are.", insight: "Image is power.", source: "The Prince" },
+                    { text: "The lion cannot protect himself from traps, and the fox cannot defend himself from wolves.", insight: "Combine strength with cunning.", source: "The Prince" },
+                    { text: "There is no other way to guard yourself against flattery than by making men understand that telling you the truth will not offend you.", insight: "Encourage honesty to avoid delusion.", source: "The Prince" },
+                    { text: "A prudent man should always follow in the footsteps of great men.", insight: "Learn from those who succeeded before.", source: "The Prince" },
+                    { text: "He who wishes to be obeyed must know how to command.", insight: "Authority requires competence.", source: "The Prince" },
+                    { text: "Men are so simple and so much inclined to obey immediate needs that a deceiver will never lack victims.", insight: "People are easily manipulated by desire.", source: "The Prince" },
+                    { text: "Politics have no relation to morals.", insight: "Pragmatism ignores ethics.", source: "The Prince" },
+                    { text: "The promise given was a necessity of the past: the word broken is a necessity of the present.", insight: "Adaptability supersedes consistency.", source: "The Prince" },
+                    { text: "It is double pleasure to deceive the deceiver.", insight: "Outsmarting a fox is satisfying.", source: "The Prince" },
+                    { text: "Hatred is gained as much by good works as by evil.", insight: "Action always invites reaction.", source: "The Prince" }
+                ]
+            },
+            aurelius: {
+                key: 'aurelius',
+                name: "Marcus Aurelius",
+                role: "The Stoic",
+                color: "#689d6a",
+                quotes: [
+                    { text: "You have power over your mind - not outside events. Realize this, and you will find strength.", insight: "Control originates from within.", source: "Meditations" },
+                    { text: "The happiness of your life depends upon the quality of your thoughts.", insight: "Mindset shapes reality.", source: "Meditations" },
+                    { text: "Waste no more time arguing about what a good man should be. Be one.", insight: "Action over definition.", source: "Meditations" },
+                    { text: "The best revenge is to be unlike him who performed the injury.", insight: "Rise above conflict.", source: "Meditations" },
+                    { text: "It is not death that a man should fear, but he should fear never beginning to live.", insight: "Exist with purpose.", source: "Meditations" },
+                    { text: "Accept the things to which fate binds you, and love the people with whom fate brings you together, but do so with all your heart.", insight: "Embrace your destiny fully.", source: "Meditations" },
+                    { text: "Very little is needed to make a happy life; it is all within yourself, in your way of thinking.", insight: "Happiness is an internal creation.", source: "Meditations" },
+                    { text: "Reject your sense of injury and the injury itself disappears.", insight: "Perception defines pain.", source: "Meditations" },
+                    { text: "When you arise in the morning think of what a privilege it is to be alive, to think, to enjoy, to love.", insight: "Gratitude fuels life.", source: "Meditations" },
+                    { text: "The object of life is not to be on the side of the majority, but to escape finding oneself in the ranks of the insane.", insight: "Think independently.", source: "Meditations" },
+                    { text: "Loss is nothing else but change, and change is Nature's delight.", insight: "Embrace the flow of change.", source: "Meditations" },
+                    { text: "Do every act of your life as if it were the last.", insight: "Live with urgency and focus.", source: "Meditations" },
+                    { text: "Confine yourself to the present.", insight: "The now is all you possess.", source: "Meditations" },
+                    { text: "Whatever the universal nature assigns to any man at any time is for the good of that man at that time.", insight: "Trust in the cosmic order.", source: "Meditations" },
+                    { text: "He who lives in harmony with himself lives in harmony with the universe.", insight: "Inner peace aligns with outer order.", source: "Meditations" }
+                ]
+            },
+            confucius: {
+                key: 'confucius',
+                name: "Confucius",
+                role: "The Mentor",
+                color: "#d65d0e",
+                quotes: [
+                    { text: "It does not matter how slowly you go as long as you do not stop.", insight: "Persistence ensures success.", source: "The Analects" },
+                    { text: "Our greatest glory is not in never falling, but in rising every time we fall.", insight: "Resilience defines character.", source: "The Analects" },
+                    { text: "Wheresoever you go, go with all your heart.", insight: "Commit fully to your path.", source: "The Analects" },
+                    { text: "Real knowledge is to know the extent of one's ignorance.", insight: "Humility opens the mind.", source: "The Analects" },
+                    { text: "Everything has beauty, but not everyone sees it.", insight: "Perspective changes value.", source: "The Analects" },
+                    { text: "What the superior man seeks is in himself; what the small man seeks is in others.", insight: "Self-reliance vs dependency.", source: "The Analects" },
+                    { text: "Respect yourself and others will respect you.", insight: "Dignity starts within.", source: "The Analects" },
+                    { text: "Attack the evil that is within yourself, rather than attacking the evil that is in others.", insight: "Focus on self-correction.", source: "The Analects" },
+                    { text: "The man who moves a mountain begins by carrying away small stones.", insight: "Big goals require small steps.", source: "The Analects" },
+                    { text: "When anger rises, think of the consequences.", insight: "Patience prevents regret.", source: "The Analects" },
+                    { text: "To be wronged is nothing, unless you continue to remember it.", insight: "Forgiveness frees the mind.", source: "The Analects" },
+                    { text: "By three methods we may learn wisdom: First, by reflection, which is noblest; Second, by imitation, which is easiest; and third by experience, which is the bitterest.", insight: "Choose your path to wisdom.", source: "The Analects" },
+                    { text: "He who learns but does not think, is lost! He who thinks but does not learn is in great danger.", insight: "Balance study with thought.", source: "The Analects" },
+                    { text: "The will to win, the desire to succeed, the urge to reach your full potential... these are the keys that will unlock the door to personal excellence.", insight: "Drive creates excellence.", source: "The Analects" },
+                    { text: "Study the past if you would define the future.", insight: "History informs destiny.", source: "The Analects" },
+                ]
+            },
+            rumi: {
+                key: 'rumi',
+                name: "Rumi",
+                role: "The Mystic",
+                color: "#a89984",
+                quotes: [
+                    { text: "The wound is the place where the Light enters you.", insight: "Pain brings enlightenment.", source: "Selected Poems" },
+                    { text: "Stop acting so small. You are the universe in ecstatic motion.", insight: "Recognize your cosmic nature.", source: "Selected Poems" },
+                    { text: "Yesterday I was clever, so I wanted to change the world. Today I am wise, so I am changing myself.", insight: "True change is internal.", source: "Selected Poems" },
+                    { text: "Don't be satisfied with stories, how things have gone with others. Unfold your own myth.", insight: "Live your own truth.", source: "Selected Poems" },
+                    { text: "Raise your words, not voice. It is rain that grows flowers, not thunder.", insight: "Gentleness persuades better than force.", source: "Selected Poems" },
+                    { text: "Lovers don't finally meet somewhere. They're in each other all along.", insight: "Connection is inherent.", source: "Selected Poems" },
+                    { text: "Knock, And He'll open the door. Vanish, And He'll make you shine like the sun.", insight: "Ego dissolution leads to glory.", source: "Selected Poems" },
+                    { text: "When you do things from your soul, you feel a river moving in you, a joy.", insight: "Authentic action brings joy.", source: "Selected Poems" },
+                    { text: "Sell your cleverness and buy bewilderment.", insight: "Wonder is worth more than intellect.", source: "Selected Poems" },
+                    { text: "Ignore those that make you fearful and sad, that degrade you back towards disease and death.", insight: "Choose uplifting company.", source: "Selected Poems" },
+                    { text: "There is a candle in your heart, ready to be kindled. There is a void in your soul, ready to be filled.", insight: "Potential awaits ignition.", source: "Selected Poems" },
+                    { text: "Words are a pretext. It is the inner bond that draws one person to another, not words.", insight: "Connection goes beyond language.", source: "Selected Poems" },
+                    { text: "Set your life on fire. Seek those who fan your flames.", insight: "Passion requires support.", source: "Selected Poems" },
+                    { text: "Be empty of worrying. Think of who created thought.", insight: "Trust in the source.", source: "Selected Poems" },
+                    { text: "Let the beauty of what you love be what you do.", insight: "Work should be love made visible.", source: "Selected Poems" }
                 ]
             }
         };
@@ -680,6 +823,7 @@
             text: "",
             words: [],
             insight: "",
+            source: "", // Add source to state
             charIndex: 0,
             startTime: null,
             timer: null,
@@ -690,7 +834,7 @@
             lastCheckIndex: 0,
             chartData: [], 
             intervalError: false,
-            totalErrors: 0 // New persistent error counter
+            totalErrors: 0 
         };
 
         // --- Battle System (Canvas Engine) ---
@@ -961,7 +1105,7 @@
             state.chartData = []; 
             state.intervalError = false;
             state.lastCheckIndex = 0;
-            state.totalErrors = 0; // Reset errors
+            state.totalErrors = 0; 
             els.hiddenInput.value = '';
             els.statsBar.style.opacity = '0.5';
             
@@ -985,6 +1129,7 @@
             const q = list[qIdx];
             state.text = q.text;
             state.insight = q.insight;
+            state.source = q.source; // Store source
             
             // Build DOM
             const words = state.text.split(' ');
@@ -1086,7 +1231,7 @@
                     target.el.classList.add('incorrect');
                     state.history.push(false);
                     state.intervalError = true; 
-                    state.totalErrors++; // Increment persistence error counter
+                    state.totalErrors++; 
                 }
                 state.charIndex++;
             }
@@ -1289,11 +1434,8 @@
             const acc = Math.round((state.history.filter(Boolean).length / state.words.length) * 100);
 
             // --- Score Calculation ---
-            // Base Score: Speed * 50 + Length * 10
             const baseScore = Math.round((wpm * 50) + (state.words.length * 10));
-            // Penalty: 150 points per ANY error made
             const penalty = state.totalErrors * 150;
-            // Final Score: Can't go below 0
             const finalScore = Math.max(0, baseScore - penalty);
 
             battle.updateProgress(1.0);
@@ -1302,7 +1444,12 @@
                 els.resWpm.innerText = wpm;
                 els.resAcc.innerText = acc + '%';
                 els.resTime.innerText = time.toFixed(1) + 's';
-                els.resInsight.innerText = state.insight;
+                
+                // Inject Insight and Source
+                els.resInsight.innerHTML = `
+                    ${state.insight}
+                    <span class="insight-source">— From: ${state.source}</span>
+                `;
                 
                 // Render Score Box
                 els.scoreBreakdown.innerHTML = `
