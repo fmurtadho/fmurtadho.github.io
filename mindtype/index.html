@@ -270,6 +270,17 @@
         @keyframes blink { 50% { opacity: 0; } }
         .typing #caret { animation: none; opacity: 0.9; }
 
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        body.pulse-caret #caret {
+            animation: pulse 2.5s ease-in-out infinite;
+            transition: left 0.1s ease-out, top 0.1s ease-out;
+        }
+
         /* --- Footer --- */
         .footer-nav {
             margin-top: 2rem;
@@ -777,24 +788,15 @@
                 key: 'aurelius',
                 name: "Marcus Aurelius",
                 role: "The Stoic",
+                animation: "pulse",
                 color: "#689d6a",
                 avatar: `<svg viewBox="0 0 24 24"><path d="M5 21h14v-2H5v2zm0-3h14v-2H5v2zM6 14h12V6H6v8zm-2-9h16V3H4v2z"/></svg>`,
                 quotes: [
-                    { text: "You have power over your mind - not outside events. Realize this, and you will find strength.", insight: "Control originates from within.", source: "Meditations" },
-                    { text: "The happiness of your life depends upon the quality of your thoughts.", insight: "Mindset shapes reality.", source: "Meditations" },
-                    { text: "Waste no more time arguing about what a good man should be. Be one.", insight: "Action over definition.", source: "Meditations" },
-                    { text: "The best revenge is to be unlike him who performed the injury.", insight: "Rise above conflict.", source: "Meditations" },
-                    { text: "It is not death that a man should fear, but he should fear never beginning to live.", insight: "Exist with purpose.", source: "Meditations" },
-                    { text: "Accept the things to which fate binds you, and love the people with whom fate brings you together, but do so with all your heart.", insight: "Embrace your destiny fully.", source: "Meditations" },
-                    { text: "Very little is needed to make a happy life; it is all within yourself, in your way of thinking.", insight: "Happiness is an internal creation.", source: "Meditations" },
-                    { text: "Reject your sense of injury and the injury itself disappears.", insight: "Perception defines pain.", source: "Meditations" },
-                    { text: "When you arise in the morning think of what a privilege it is to be alive, to think, to enjoy, to love.", insight: "Gratitude fuels life.", source: "Meditations" },
-                    { text: "The object of life is not to be on the side of the majority, but to escape finding oneself in the ranks of the insane.", insight: "Think independently.", source: "Meditations" },
-                    { text: "Loss is nothing else but change, and change is Nature's delight.", insight: "Embrace the flow of change.", source: "Meditations" },
-                    { text: "Do every act of your life as if it were the last.", insight: "Live with urgency and focus.", source: "Meditations" },
-                    { text: "Confine yourself to the present.", insight: "The now is all you possess.", source: "Meditations" },
-                    { text: "Whatever the universal nature assigns to any man at any time is for the good of that man at that time.", insight: "Trust in the cosmic order.", source: "Meditations" },
-                    { text: "He who lives in harmony with himself lives in harmony with the universe.", insight: "Inner peace aligns with outer order.", source: "Meditations" }
+                    { text: "The happiness of your life depends upon the quality of your thoughts: therefore, guard accordingly, and take care that you entertain no notions unsuitable to virtue and reasonable nature.", insight: "Mindset shapes reality.", source: "Meditations" },
+                    { text: "You have power over your mind — not outside events. Realize this, and you will find strength. The universe is transformation; our life is what our thoughts make it.", insight: "Control originates from within.", source: "Meditations" },
+                    { text: "Waste no more time arguing about what a good man should be. Be one. Dwell on the beauty of life. Watch the stars, and see yourself running with them.", insight: "Action over definition.", source: "Meditations" },
+                    { text: "The best revenge is to be unlike him who performed the injury. It is not death that a man should fear, but he should fear never beginning to live.", insight: "Rise above conflict.", source: "Meditations" },
+                    { text: "Accept the things to which fate binds you, and love the people with whom fate brings you together, but do so with all your heart and soul.", insight: "Embrace your destiny fully.", source: "Meditations" }
                 ]
             },
             confucius: {
@@ -912,7 +914,7 @@
             lastCheckIndex: 0,
             chartData: [], 
             intervalError: false,
-            totalErrors: 0 
+            totalErrors: 0
         };
 
         // --- Battle System (Canvas Engine) ---
@@ -1154,6 +1156,13 @@
         function selectMaster(key) {
             state.master = masters[key];
             els.root.style.setProperty('--accent', state.master.color);
+            
+            // Animation Handling
+            document.body.classList.remove('pulse-caret');
+            if (state.master.animation === 'pulse') {
+                document.body.classList.add('pulse-caret');
+            }
+
             els.masterIndicator.innerText = state.master.role;
             state.lastQuoteIndex = -1; 
             
@@ -1172,6 +1181,7 @@
             els.typingScreen.classList.add('hidden');
             els.selectionScreen.classList.remove('hidden');
             state.isRunning = false;
+            document.body.classList.remove('pulse-caret');
         }
 
         function initGame(quoteIndex = null) {
@@ -1310,7 +1320,7 @@
                     target.el.classList.add('incorrect');
                     state.history.push(false);
                     state.intervalError = true; 
-                    state.totalErrors++; 
+                    state.totalErrors++;
                 }
                 state.charIndex++;
             }
