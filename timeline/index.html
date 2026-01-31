@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Literasi Termodinamika & Sistem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+        .serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .timeline-container {
+            position: relative;
+            padding: 2rem 0;
+        }
+        /* Garis Tengah */
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            background: linear-gradient(to bottom, #3b82f6, #10b981, #f59e0b);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -1px;
+        }
+        @media (max-width: 768px) {
+            .timeline-container::after {
+                left: 31px;
+            }
+        }
+        .timeline-item {
+            padding: 1rem 0;
+            position: relative;
+            width: 50%;
+            transition: all 0.3s ease;
+        }
+        .timeline-item:nth-child(even) {
+            left: 50%;
+            padding-left: 40px;
+        }
+        .timeline-item:nth-child(odd) {
+            left: 0;
+            padding-right: 40px;
+            text-align: right;
+        }
+        @media (max-width: 768px) {
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px !important;
+                padding-right: 20px !important;
+                text-align: left !important;
+                left: 0 !important;
+            }
+        }
+        /* Titik (Dot) */
+        .dot {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #3b82f6;
+            border: 4px solid #0f172a;
+            border-radius: 50%;
+            top: 24px;
+            z-index: 10;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        .timeline-item:nth-child(even) .dot {
+            left: -8px;
+        }
+        .timeline-item:nth-child(odd) .dot {
+            right: -8px;
+        }
+        @media (max-width: 768px) {
+            .dot {
+                left: 23px !important;
+                right: auto !important;
+            }
+        }
+        .timeline-item:hover .dot {
+            transform: scale(1.5);
+            background: #f59e0b;
+        }
+        /* Kartu */
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .timeline-item:hover .card {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+        .year-tag {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="py-16 px-4 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold serif mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+            Evolusi Pemikiran Sistem
+        </h1>
+        <p class="text-slate-400 max-w-2xl mx-auto">
+            Garis waktu literasi kunci yang membentuk pemahaman kita tentang Termodinamika, Entropi, dan Ekonomi Biofisik.
+        </p>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4 pb-20">
+        <div class="timeline-container" id="timeline">
+            <!-- Items akan diisi oleh JavaScript untuk efisiensi, atau manual -->
+        </div>
+    </div>
+
+    <script>
+        const data = [
+            { year: "1944", title: "What is Life?", author: "Erwin Schrödinger", focus: "Konsep Negentropi dan kode fisik kehidupan." },
+            { year: "1971", title: "The Entropy Law and the Economic Process", author: "N. Georgescu-Roegen", focus: "Teori fundamental: Ekonomi adalah proses searah." },
+            { year: "1972", title: "Limits to Growth", author: "Donella Meadows, et al.", focus: "Simulasi komputer pertama tentang batas pertumbuhan." },
+            { year: "1973", title: "Small is Beautiful", author: "E.F. Schumacher", focus: "Ekonomi yang sadar akan skala manusia dan alam." },
+            { year: "1980", title: "Entropy: A New World View", author: "Jeremy Rifkin", focus: "Narasi populer tentang pergeseran paradigma dunia." },
+            { year: "1984", title: "Order Out of Chaos", author: "Ilya Prigogine", focus: "Bagaimana struktur muncul dalam sistem termodinamika." },
+            { year: "1984", title: "The Second Law", author: "P.W. Atkins", focus: "Penjelasan intuitif tentang Hukum Kedua Termodinamika." },
+            { year: "1986", title: "Energy and Resource Quality", author: "Hall, Cleveland, & Kaufmann", focus: "Dasar matematis metrik EROI (EROI = Eout / Ein)." },
+            { year: "1988", title: "The Collapse of Complex Societies", author: "Joseph Tainter", focus: "Analisis biaya energi dari kompleksitas sosial." },
+            { year: "1990", title: "The Arrow of Time", author: "Coveney & Highfield", focus: "Fisika waktu dan alasan arah entropi tak terbalik." },
+            { year: "1991", title: "Understanding Thermodynamics", author: "H.C. Van Ness", focus: "Dokumentasi teknis tentang hukum-hukum panas." },
+            { year: "2002", title: "Into the Cool", author: "Schneider & Sagan", focus: "Termodinamika dalam sistem biologis dan ekologi." },
+            { year: "2008", title: "Thinking in Systems", author: "Donella Meadows", focus: "Metodologi untuk memahami feedback loops sistem." },
+            { year: "2009", title: "Complexity: A Guided Tour", author: "Melanie Mitchell", focus: "Peta jalan untuk memahami sistem adaptif kompleks." },
+            { year: "2010", title: "Decoding Reality", author: "Vlatko Vedral", focus: "Memandang alam semesta sebagai informasi dan bit." },
+            { year: "2011", title: "The Information", author: "James Gleick", focus: "Sejarah informasi, entropi, dan teori komunikasi." },
+            { year: "2012", title: "Antifragile", author: "Nassim Nicholas Taleb", focus: "Sistem yang memanfaatkan gangguan (entropi rendah)." },
+            { year: "2015", title: "The Vital Question", author: "Nick Lane", focus: "Energi sebagai 'baterai' utama evolusi kehidupan." },
+            { year: "2017", title: "Energy and Civilization: A History", author: "Vaclav Smil", focus: "Sejarah peradaban sebagai sejarah konversi energi." },
+            { year: "2017", title: "Scale", author: "Geoffrey West", focus: "Hukum matematika universal untuk pertumbuhan sistem." },
+            { year: "2017", title: "Doughnut Economics", author: "Kate Raworth", focus: "Model ekonomi yang menghormati batas biofisik." },
+            { year: "2018", title: "Energy and the Wealth of Nations (Ed. 2)", author: "Hall & Klitgaard", focus: "Buku teks utama ekonomi biofisik modern." },
+            { year: "2019", title: "Growth", author: "Vaclav Smil", focus: "Analisis mendalam tentang batasan pertumbuhan fisik." },
+            { year: "2022", title: "How the World Really Works", author: "Vaclav Smil", focus: "Realitas pilar material yang menopang dunia." },
+            { year: "2023", title: "Material World", author: "Ed Conway", focus: "Entropi material dan rantai pasok energi global." }
+        ];
+
+        const container = document.getElementById('timeline');
+
+        data.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'timeline-item';
+            div.innerHTML = `
+                <div class="dot"></div>
+                <div class="card">
+                    <span class="year-tag">${item.year}</span>
+                    <h3 class="text-xl font-bold serif text-blue-300 italic mb-1">"${item.title}"</h3>
+                    <p class="text-sm text-emerald-400 font-medium mb-3">${item.author}</p>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        ${item.focus}
+                    </p>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    </script>
+
+    <footer class="py-10 text-center text-slate-500 text-xs border-t border-slate-800">
+        &copy; 2024 Visualisasi Timeline Literasi | Dibuat dengan Prinsip Termodinamika
+    </footer>
+</body>
+</html>
