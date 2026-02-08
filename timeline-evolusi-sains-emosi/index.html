@@ -1,318 +1,480 @@
-import React, { useState } from 'react';
-import { 
-  BookOpen, 
-  Zap, 
-  FlaskConical, 
-  Dna, 
-  BrainCircuit, 
-  ArrowRight, 
-  Clock, 
-  ShieldAlert,
-  ChevronRight,
-  ChevronDown
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Evolusi Sains Emosi</title>
+    <style>
+        :root {
+            --classic-color: #3b82f6;
+            --mechanism-color: #6366f1;
+            --newwave-color: #a855f7;
+            --bg-color: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
 
-const timelineData = [
-  // BAGIAN I: FONDASI KLASIK
-  {
-    year: "1872",
-    author: "Charles Darwin",
-    title: "The Expression of the Emotions in Man and Animals",
-    category: "Bagian I: Fondasi Klasik",
-    focus: "Biologi Evolusioner",
-    core: "Emosi adalah produk evolusi yang universal untuk bertahan hidup.",
-    viewpoint: "Biologis / Fungsional",
-    debunks: "Menentang ide bahwa emosi manusia adalah hal mistis atau unik hanya untuk manusia; emosi memiliki akar pada hewan.",
-    icon: <Dna className="w-6 h-6" />,
-    color: "blue"
-  },
-  {
-    year: "1890",
-    author: "William James",
-    title: "The Principles of Psychology",
-    category: "Bagian I: Fondasi Klasik",
-    focus: "Fisiologi (Fisika Tubuh)",
-    core: "Perasaan adalah persepsi kita terhadap perubahan fisik (detak jantung, otot tegang).",
-    viewpoint: "Fisiko-Psikologis",
-    debunks: "Membantah urutan logika umum: kita tidak menangis karena sedih, kita sedih karena kita menangis.",
-    icon: <Zap className="w-6 h-6" />,
-    color: "blue"
-  },
-  {
-    year: "1906",
-    author: "Sir Charles Sherrington",
-    title: "The Integrative Action of the Nervous System",
-    category: "Bagian I: Fondasi Klasik",
-    focus: "Neurofisika",
-    core: "Bagaimana sinyal listrik berpindah antar sinapsis untuk mengoordinasikan reaksi tubuh.",
-    viewpoint: "Biofisika",
-    debunks: "Menghilangkan konsep 'roh' dalam gerakan tubuh; menggantinya dengan transmisi sinyal saraf mekanistik.",
-    icon: <Zap className="w-6 h-6" />,
-    color: "blue"
-  },
-  {
-    year: "1949",
-    author: "Donald O. Hebb",
-    title: "The Organization of Behavior",
-    category: "Bagian I: Fondasi Klasik",
-    focus: "Neurobiologi",
-    core: "Menjelaskan secara fisik bagaimana pengalaman emosional membentuk jalur saraf yang permanen.",
-    viewpoint: "Koneksionisme (Cells that fire together, wire together)",
-    debunks: "Membantah ide bahwa otak adalah organ statis; otak berubah secara fisik mengikuti pola perilaku/emosi.",
-    icon: <BrainCircuit className="w-6 h-6" />,
-    color: "blue"
-  },
-  // BAGIAN II: MEKANISME SPESIFIK & MOLEKULER
-  {
-    year: "1996",
-    author: "Joseph LeDoux",
-    title: "The Emotional Brain",
-    category: "Bagian II: Mekanisme Spesifik",
-    focus: "Neurobiologi (Sirkuit Rasa Takut)",
-    core: "Pemetaan fisik area otak (seperti Amigdala) sebagai pusat kendali emosi tertentu.",
-    viewpoint: "Lokalisasi Sirkuit",
-    debunks: "Menentang pandangan bahwa emosi hanyalah proses kognitif lambat; ada 'jalur cepat' instingtif di otak.",
-    icon: <ShieldAlert className="w-6 h-6" />,
-    color: "indigo"
-  },
-  {
-    year: "1994",
-    author: "Antonio Damasio",
-    title: "Descartes' Error",
-    category: "Bagian II: Mekanisme Spesifik",
-    focus: "Biologi Kognitif",
-    core: "Membuktikan bahwa tanpa input emosional dari tubuh, otak manusia tidak bisa berpikir rasional.",
-    viewpoint: "Integrasi Otak-Tubuh",
-    debunks: "Membantah Dualisme Descartes (pemisahan pikiran dan tubuh).",
-    icon: <BrainCircuit className="w-6 h-6" />,
-    color: "indigo"
-  },
-  {
-    year: "1997",
-    author: "Candace Pert",
-    title: "Molecules of Emotion",
-    category: "Bagian II: Mekanisme Spesifik",
-    focus: "Biokimia",
-    core: "Menjelaskan bagaimana neuropeptida (molekul kimia) menghubungkan pikiran dengan setiap sel di tubuh.",
-    viewpoint: "Psikoneuroimunologi",
-    debunks: "Membantah bahwa emosi hanya terjadi di otak; emosi bersifat sistemik di seluruh cairan kimia tubuh.",
-    icon: <FlaskConical className="w-6 h-6" />,
-    color: "indigo"
-  },
-  // BAGIAN III: GELOMBANG BARU (KONSTRUKTIVISME)
-  {
-    year: "1980s-2000s",
-    author: "James Russell",
-    title: "The Circumplex Model of Affect",
-    category: "Bagian III: Gelombang Baru",
-    focus: "Psikofisika (Energi vs Kenyamanan)",
-    core: "Emosi bukan 'benda' di otak, melainkan label untuk koordinat energi (Arousal) dan kenyamanan (Valence).",
-    viewpoint: "Dimensional Affect",
-    debunks: "Membantah adanya 'Emosi Dasar' (Basic Emotions) yang terpisah secara biologis.",
-    icon: <Zap className="w-6 h-6" />,
-    color: "purple"
-  },
-  {
-    year: "2017",
-    author: "Lisa Feldman Barrett",
-    title: "How Emotions Are Made",
-    category: "Bagian III: Gelombang Baru",
-    focus: "Neurosains Modern (Predictive Brain)",
-    core: "Otak tidak bereaksi terhadap emosi, otak mengonstruksi emosi berdasarkan prediksi dan pengalaman masa lalu.",
-    viewpoint: "Konstruksi Sosial-Biologis",
-    debunks: "Membantah hampir seluruh pandangan klasik (Darwin & LeDoux) tentang sirkuit emosi bawaan.",
-    icon: <BrainCircuit className="w-6 h-6" />,
-    color: "purple"
-  },
-  {
-    year: "2007",
-    author: "Jerome Kagan",
-    title: "What Is Emotion?",
-    category: "Bagian III: Gelombang Baru",
-    focus: "Psikologi Biologis & Konteks",
-    core: "Menentang gagasan bahwa satu bagian otak bertanggung jawab atas satu emosi (menentang lokalisasi).",
-    viewpoint: "Kontekstualisme",
-    debunks: "Menolak lokalisasi ketat; mengkritik ide bahwa memindai otak (fMRI) bisa langsung membaca perasaan seseorang.",
-    icon: <BrainCircuit className="w-6 h-6" />,
-    color: "purple"
-  },
-  {
-    year: "1997",
-    author: "Paul Griffiths",
-    title: "What Emotions Really Are",
-    category: "Bagian III: Gelombang Baru",
-    focus: "Filsafat Sains",
-    core: "Membedah secara radikal apakah istilah 'emosi' sebenarnya masih relevan secara ilmiah atau hanya sekadar kategori bahasa yang kacau.",
-    viewpoint: "Eliminativisme / Filsafat Analitis",
-    debunks: "Menentang penggunaan satu istilah tunggal 'Emosi' untuk fenomena biologis yang berbeda-beda.",
-    icon: <BookOpen className="w-6 h-6" />,
-    color: "purple"
-  }
-];
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
 
-const TimelineCard = ({ data, index }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  const getColorClasses = (color) => {
-    const colors = {
-      blue: "bg-blue-50 border-blue-200 text-blue-700",
-      indigo: "bg-indigo-50 border-indigo-200 text-indigo-700",
-      purple: "bg-purple-50 border-purple-200 text-purple-700"
-    };
-    return colors[color] || colors.blue;
-  };
+        header {
+            background: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
 
-  const getIconColor = (color) => {
-    const colors = {
-      blue: "text-blue-500",
-      indigo: "text-indigo-500",
-      purple: "text-purple-500"
-    };
-    return colors[color] || colors.blue;
-  };
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: #0f172a;
+        }
 
-  return (
-    <div className={`relative pl-8 pb-12 transition-all duration-300 ${index === timelineData.length - 1 ? '' : 'border-l-2 border-gray-200 ml-4'}`}>
-      {/* Dot on timeline */}
-      <div className={`absolute -left-[11px] top-0 w-5 h-5 rounded-full border-4 border-white shadow-sm transition-transform hover:scale-125 cursor-pointer ${
-        data.color === "blue" ? "bg-blue-500" : 
-        data.color === "indigo" ? "bg-indigo-500" : "bg-purple-500"
-      }`} />
-      
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
-        <div className="p-5">
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1">
-              <Clock className="w-3 h-3" /> {data.year}
-            </span>
-            <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase ${getColorClasses(data.color)}`}>
-              {data.category}
-            </span>
-          </div>
-          
-          <h3 className="text-xl font-bold text-gray-800 mb-1">{data.author}</h3>
-          <p className="text-sm italic text-gray-500 mb-4">"{data.title}"</p>
-          
-          <div className="flex items-center gap-3 mb-4">
-            <div className={`p-2 rounded-lg bg-gray-50 ${getIconColor(data.color)}`}>
-              {data.icon}
-            </div>
-            <div>
-              <p className="text-xs text-gray-400 font-medium">Fokus Utama</p>
-              <p className="text-sm font-semibold text-gray-700">{data.focus}</p>
-            </div>
-          </div>
+        header h1 span {
+            color: var(--mechanism-color);
+        }
 
-          <button 
-            onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-            {isOpen ? "Sembunyikan Detail" : "Lihat Detail Gagasan"}
-          </button>
+        header p {
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
 
-          {isOpen && (
-            <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-              <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-300">
-                <p className="text-xs font-bold text-gray-400 uppercase mb-1">Inti Pemikiran</p>
-                <p className="text-gray-700 text-sm leading-relaxed">{data.core}</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-emerald-50 rounded-lg border-l-4 border-emerald-400">
-                  <p className="text-xs font-bold text-emerald-600 uppercase mb-1">Sudut Pandang</p>
-                  <p className="text-emerald-800 text-sm font-medium">{data.viewpoint}</p>
-                </div>
-                <div className="p-4 bg-rose-50 rounded-lg border-l-4 border-rose-400">
-                  <p className="text-xs font-bold text-rose-600 uppercase mb-1">Gagasan yang Dibantah</p>
-                  <p className="text-rose-800 text-sm italic">{data.debunks}</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* Timeline Structure */
+        .timeline {
+            position: relative;
+            border-left: 3px solid #e2e8f0;
+            margin-left: 20px;
+            padding-left: 30px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 3rem;
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -38px;
+            top: 5px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #cbd5e1;
+            z-index: 1;
+        }
+
+        /* Category Coloring */
+        .item-classic::before { border-color: var(--classic-color); }
+        .item-mechanism::before { border-color: var(--mechanism-color); }
+        .item-newwave::before { border-color: var(--newwave-color); }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f1f5f9;
+        }
+
+        .year-tag {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .author {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin: 0;
+            color: #0f172a;
+        }
+
+        .title {
+            font-style: italic;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .focus-box {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            background: #f1f5f9;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-cols: 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        @media (min-width: 600px) {
+            .detail-grid { grid-template-cols: 1fr 1fr; }
+        }
+
+        .info-block h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+        }
+
+        .info-block p {
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
+        .core-text { color: #334155; }
+        .view-text { color: #059669; font-weight: 600; }
+        .debunks-text { color: #e11d48; font-style: italic; }
+
+        footer {
+            text-align: center;
+            padding: 4rem 1rem;
+            background: #0f172a;
+            color: white;
+            margin-top: 4rem;
+        }
+
+        .synthesis {
+            max-width: 600px;
+            margin: 0 auto;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Evolusi Sains <span>Emosi</span></h1>
+    <p>Hubungan Fisika, Kimia, dan Biologi dalam Konteks Perasaan Manusia</p>
+</header>
+
+<div class="container">
+    <div class="legend">
+        <div class="legend-item"><div class="dot" style="background:var(--classic-color)"></div> Bagian I: Fondasi Klasik</div>
+        <div class="legend-item"><div class="dot" style="background:var(--mechanism-color)"></div> Bagian II: Mekanisme Spesifik</div>
+        <div class="legend-item"><div class="dot" style="background:var(--newwave-color)"></div> Bagian III: Gelombang Baru</div>
     </div>
-  );
-};
 
-const App = () => {
-  return (
-    <div className="min-h-screen bg-slate-50 text-gray-900 font-sans selection:bg-indigo-100">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-4xl mx-auto px-6 py-6">
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-            Evolusi Sains <span className="text-indigo-600">Emosi</span>
-          </h1>
-          <p className="text-gray-500 mt-2 max-w-2xl">
-            Dari Fondasi Klasik (Esensialisme) hingga Gelombang Baru (Konstruktivisme). Pemetaan hubungan Fisika, Kimia, dan Biologi.
-          </p>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-12">
-        {/* Legend Section */}
-        <section className="mb-12 flex flex-wrap gap-4 justify-center">
-            <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-xs font-bold text-blue-700">Bagian I: Fondasi Klasik</span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-full">
-                <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                <span className="text-xs font-bold text-indigo-700">Bagian II: Mekanisme Spesifik</span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-purple-50 border border-purple-200 rounded-full">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span className="text-xs font-bold text-purple-700">Bagian III: Gelombang Baru</span>
-            </div>
-        </section>
-
-        {/* Timeline */}
-        <section>
-          <div className="flex items-center gap-2 mb-8 ml-4">
-            <div className="bg-gray-900 text-white p-1 rounded">
-              <Clock className="w-4 h-4" />
-            </div>
-            <h2 className="text-xl font-bold uppercase tracking-widest text-gray-400">Urutan Referensi Literasi</h2>
-          </div>
-
-          <div className="space-y-2">
-            {timelineData.map((item, index) => (
-              <TimelineCard key={index} data={item} index={index} />
-            ))}
-          </div>
-        </section>
-
-        {/* Synthesis Footer */}
-        <section className="mt-20 p-8 bg-gray-900 rounded-3xl text-white shadow-xl">
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <ArrowRight className="text-indigo-400" /> Navigasi Membaca
-          </h2>
-          <div className="space-y-4 text-gray-300 leading-relaxed">
-            <p>
-              Urutan ini disusun mengikuti perkembangan teori. Mulailah dengan <strong>Darwin</strong> untuk memahami fungsi evolusi, berlanjut ke <strong>Damasio/Pert</strong> untuk melihat kimia dan organ tubuh, dan diakhiri dengan <strong>Barrett/Griffiths</strong> untuk melihat bagaimana semua itu dikonstruksi menjadi makna.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-                <div className="bg-gray-800 p-4 rounded-xl border border-gray-700">
-                    <p className="text-xs font-bold text-indigo-400 mb-1">Fisika</p>
-                    <p className="text-sm">Transmisi Sinyal (James, Sherrington, Hebb)</p>
+    <div class="timeline">
+        
+        <!-- BAGIAN I -->
+        <article class="timeline-item item-classic">
+            <div class="card">
+                <span class="year-tag">1872</span>
+                <h3 class="author">Charles Darwin</h3>
+                <p class="title">The Expression of the Emotions in Man and Animals</p>
+                <div class="focus-box">Fokus: Biologi Evolusioner</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Emosi adalah produk evolusi yang universal untuk bertahan hidup.</p>
                 </div>
-                <div className="bg-gray-800 p-4 rounded-xl border border-gray-700">
-                    <p className="text-xs font-bold text-indigo-400 mb-1">Kimia</p>
-                    <p className="text-sm">Molekul & Cairan (Pert, Russell)</p>
-                </div>
-                <div className="bg-gray-800 p-4 rounded-xl border border-gray-700">
-                    <p className="text-xs font-bold text-indigo-400 mb-1">Biologi</p>
-                    <p className="text-sm">Evolusi & Organ (Darwin, LeDoux, Damasio, Barrett)</p>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Biologis / Fungsional</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Menentang ide bahwa emosi manusia bersifat mistis atau unik; emosi berakar pada hewan.</p>
+                    </div>
                 </div>
             </div>
-          </div>
-        </section>
-      </main>
+        </article>
+
+        <article class="timeline-item item-classic">
+            <div class="card">
+                <span class="year-tag">1890</span>
+                <h3 class="author">William James</h3>
+                <p class="title">The Principles of Psychology</p>
+                <div class="focus-box">Fokus: Fisiologi (Fisika Tubuh)</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Perasaan adalah persepsi kita terhadap perubahan fisik seperti detak jantung atau otot tegang.</p>
+                </div>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Fisiko-Psikologis</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Membantah urutan logika umum: kita sedih karena kita menangis, bukan sebaliknya.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item item-classic">
+            <div class="card">
+                <span class="year-tag">1906</span>
+                <h3 class="author">Sir Charles Sherrington</h3>
+                <p class="title">The Integrative Action of the Nervous System</p>
+                <div class="focus-box">Fokus: Neurofisika</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Menjelaskan bagaimana sinyal listrik berpindah antar sinapsis untuk mengoordinasikan reaksi tubuh.</p>
+                </div>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Biofisika</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Mengganti konsep 'roh' atau 'energi vital' dengan transmisi saraf mekanistik.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item item-classic">
+            <div class="card">
+                <span class="year-tag">1949</span>
+                <h3 class="author">Donald O. Hebb</h3>
+                <p class="title">The Organization of Behavior</p>
+                <div class="focus-box">Fokus: Neurobiologi</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Pengalaman emosional membentuk jalur saraf fisik yang permanen di otak ("fire together, wire together").</p>
+                </div>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Koneksionisme</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Membantah ide bahwa otak adalah organ statis; otak berubah secara fisik karena emosi.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- BAGIAN II -->
+        <article class="timeline-item item-mechanism">
+            <div class="card">
+                <span class="year-tag">1996</span>
+                <h3 class="author">Joseph LeDoux</h3>
+                <p class="title">The Emotional Brain</p>
+                <div class="focus-box">Fokus: Neurobiologi Sirkuit</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Pemetaan fisik area otak (seperti Amigdala) sebagai pusat kendali emosi tertentu seperti rasa takut.</p>
+                </div>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Lokalisasi Sirkuit</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Menentang pandangan bahwa emosi hanyalah proses kognitif lambat.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item item-mechanism">
+            <div class="card">
+                <span class="year-tag">1994</span>
+                <h3 class="author">Antonio Damasio</h3>
+                <p class="title">Descartes' Error</p>
+                <div class="focus-box">Fokus: Biologi Kognitif</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Membuktikan bahwa tanpa input emosional dari tubuh, otak manusia tidak bisa berpikir rasional.</p>
+                </div>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Integrasi Otak-Tubuh</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Membantah Dualisme Descartes (pemisahan mutlak pikiran dan tubuh).</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item item-mechanism">
+            <div class="card">
+                <span class="year-tag">1997</span>
+                <h3 class="author">Candace Pert</h3>
+                <p class="title">Molecules of Emotion</p>
+                <div class="focus-box">Fokus: Biokimia</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Neuropeptida (molekul kimia) menghubungkan pikiran dengan setiap sel di tubuh secara sistemik.</p>
+                </div>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Psikoneuroimunologi</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Membantah bahwa emosi hanya terjadi di otak; emosi ada di seluruh cairan kimia tubuh.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- BAGIAN III -->
+        <article class="timeline-item item-newwave">
+            <div class="card">
+                <span class="year-tag">1980s - 2000s</span>
+                <h3 class="author">James Russell</h3>
+                <p class="title">The Circumplex Model of Affect</p>
+                <div class="focus-box">Fokus: Psikofisika</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Emosi bukan 'benda' di otak, melainkan label untuk koordinat energi (Arousal) dan kenyamanan (Valence).</p>
+                </div>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Dimensional Affect</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Membantah adanya 'Emosi Dasar' yang terpisah secara biologis bawaan.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item item-newwave">
+            <div class="card">
+                <span class="year-tag">2017</span>
+                <h3 class="author">Lisa Feldman Barrett</h3>
+                <p class="title">How Emotions Are Made</p>
+                <div class="focus-box">Fokus: Neurosains Modern</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Otak mengonstruksi emosi berdasarkan prediksi dan pengalaman masa lalu, bukan sekadar bereaksi.</p>
+                </div>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Konstruktivisme</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Membantah pandangan klasik Darwin dan LeDoux tentang sirkuit emosi bawaan.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item item-newwave">
+            <div class="card">
+                <span class="year-tag">2007</span>
+                <h3 class="author">Jerome Kagan</h3>
+                <p class="title">What Is Emotion?</p>
+                <div class="focus-box">Fokus: Psikologi & Konteks</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Menentang gagasan lokalisasi ketat; emosi sangat bergantung pada konteks lingkungan dan temperamen.</p>
+                </div>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Kontekstualisme</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Mengkritik ide bahwa memindai otak bisa langsung membaca perasaan seseorang secara akurat.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item item-newwave">
+            <div class="card">
+                <span class="year-tag">1997</span>
+                <h3 class="author">Paul Griffiths</h3>
+                <p class="title">What Emotions Really Are</p>
+                <div class="focus-box">Fokus: Filsafat Sains</div>
+                <div class="info-block">
+                    <h4>Inti Pemikiran</h4>
+                    <p class="core-text">Membedah apakah istilah 'emosi' masih relevan secara ilmiah atau hanya kategori bahasa yang kacau.</p>
+                </div>
+                <div class="detail-grid">
+                    <div class="info-block">
+                        <h4>Sudut Pandang Utama</h4>
+                        <p class="view-text">Eliminativisme</p>
+                    </div>
+                    <div class="info-block">
+                        <h4>Gagasan yang Dibantah</h4>
+                        <p class="debunks-text">Menentang penggunaan satu istilah tunggal 'Emosi' untuk fenomena biologis yang berbeda.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
     </div>
-  );
-};
+</div>
 
-export default App;
+<footer>
+    <h3>Ringkasan Perjalanan</h3>
+    <p class="synthesis">
+        Membaca dari 1872 hingga 2017 menunjukkan pergeseran besar: dari melihat emosi sebagai "insting fisik" (Darwin/James) menuju "sirkuit spesifik" (LeDoux), hingga akhirnya dipahami sebagai "konstruksi prediksi" otak (Barrett).
+    </p>
+</footer>
+
+</body>
+</html>
